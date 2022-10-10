@@ -24,10 +24,22 @@ FirstPluginAudioProcessor::FirstPluginAudioProcessor()
 {
     addParameter(mGainParameter = new juce::AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     mGainSmoothed = mGainParameter->get();
+    mCircularBufferLeft = nullptr;
+    mCircularBufferRight = nullptr;
+    mCircularBufferWriteHead = 0;
+    mCircularBufferLength = 0;
 }
 
 FirstPluginAudioProcessor::~FirstPluginAudioProcessor()
 {
+    if (mCircularBufferLeft != nullptr) {
+        delete [] mCircularBufferLeft;
+        mCircularBufferLeft = nullptr;
+    }
+    if (mCircularBufferRight != nullptr) {
+        delete[] mCircularBufferRight;
+        mCircularBufferRight = nullptr;
+    }
 }
 
 //==============================================================================
@@ -97,6 +109,14 @@ void FirstPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    mCircularBufferLength = sampleRate * MAX_DELAY_TIME;
+    if (mCircularBufferLeft == nullptr) {
+        mCircularBufferLeft = new float[mCircularBufferLength];
+    }
+    if (mCircularBufferRight == nullptr) {
+        mCircularBufferRight = new float[mCircularBufferLength];
+    }
+    mCircularBufferWriteHead = 0;
 }
 
 void FirstPluginAudioProcessor::releaseResources()
@@ -163,6 +183,12 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         mGainSmoothed -= 0.004 * (mGainSmoothed - mGainParameter->get());
         channelLeft[sample] *= mGainSmoothed;
         channelRight[sample] *= mGainSmoothed;
+        mCircularBufferLeft[mCircularBufferWriteHead] = channelLeft[sample];
+        mCircularBufferRight[mCircularBufferWriteHead] = channelRight[sample];
+        mCircularBufferWriteHead++;
+        if (mCircularBufferWriteHead >= mCircularBufferLength) {
+            mCircularBufferWriteHead = 0;
+        }
     }
 }
 
