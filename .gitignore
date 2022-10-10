@@ -3,3 +3,6 @@
 ################################################################################
 
 /.vs
+/FirstPlugin/JuceLibraryCode
+/FirstPlugin/FirstPlugin.jucer
+/FirstPlugin/Builds/VisualStudio2022
