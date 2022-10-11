@@ -68,5 +68,11 @@ private:
     int mCircularBufferWriteHead;
     int mCircularBufferLength;
 
+    float mDelayTimeInSamples;
+    float mDelayReadHead;
+    float mFeedbackLeft;
+    float mFeedbackRight;
+    float mDryWet;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FirstPluginAudioProcessor)
 };

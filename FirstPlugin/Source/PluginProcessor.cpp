@@ -28,6 +28,11 @@ FirstPluginAudioProcessor::FirstPluginAudioProcessor()
     mCircularBufferRight = nullptr;
     mCircularBufferWriteHead = 0;
     mCircularBufferLength = 0;
+    mDelayTimeInSamples = 0.0;
+    mDelayReadHead = 0.0;
+    mFeedbackLeft = 0.0;
+    mFeedbackRight = 0.0;
+    mDryWet = 0.5;
 }
 
 FirstPluginAudioProcessor::~FirstPluginAudioProcessor()
@@ -109,6 +114,8 @@ void FirstPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    mDelayTimeInSamples = sampleRate * 0.5;
+
     mCircularBufferLength = sampleRate * MAX_DELAY_TIME;
     if (mCircularBufferLeft == nullptr) {
         mCircularBufferLeft = new float[mCircularBufferLength];
@@ -175,16 +182,28 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     auto* channelLeft = buffer.getWritePointer(0);
     auto* channelRight = buffer.getWritePointer(1);
 
-    DBG(*mGainParameter);
-
     // ..do something to the data...
     for (int sample = 0; sample < buffer.getNumSamples(); sample++)
     {
         mGainSmoothed -= 0.004 * (mGainSmoothed - mGainParameter->get());
         channelLeft[sample] *= mGainSmoothed;
         channelRight[sample] *= mGainSmoothed;
-        mCircularBufferLeft[mCircularBufferWriteHead] = channelLeft[sample];
-        mCircularBufferRight[mCircularBufferWriteHead] = channelRight[sample];
+        mCircularBufferLeft[mCircularBufferWriteHead] = channelLeft[sample] + mFeedbackLeft;
+        mCircularBufferRight[mCircularBufferWriteHead] = channelRight[sample] + mFeedbackRight;
+
+        mDelayReadHead = mCircularBufferWriteHead - mDelayTimeInSamples;
+        if (mDelayReadHead < 0) {
+            mDelayReadHead += mCircularBufferLength;
+        }
+
+        float delay_sample_left = mCircularBufferLeft[(int)mDelayReadHead];
+        float delay_sample_right = mCircularBufferRight[(int)mDelayReadHead];
+        mFeedbackLeft = delay_sample_left * 0.4;
+        mFeedbackRight = delay_sample_right * 0.4;
+
+        buffer.setSample(0, sample, buffer.getSample(0, sample) * mDryWet + delay_sample_left * (1 - mDryWet));
+        buffer.setSample(1, sample, buffer.getSample(1, sample) * mDryWet + delay_sample_right * (1 - mDryWet));
+
         mCircularBufferWriteHead++;
         if (mCircularBufferWriteHead >= mCircularBufferLength) {
             mCircularBufferWriteHead = 0;
