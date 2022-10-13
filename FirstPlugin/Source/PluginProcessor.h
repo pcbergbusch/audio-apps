@@ -58,10 +58,16 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    float lin_interp(float x1, float x2, float phase);
+
 private:
     //==============================================================================
     juce::AudioParameterFloat* mGainParameter;
+    juce::AudioParameterFloat* mDryWetParameter;
+    juce::AudioParameterFloat* mFeedbackParameter;
+    juce::AudioParameterFloat* mDelayTimeParameter;
     float mGainSmoothed;
+    float mDelayTimeSmoothed;
 
     float* mCircularBufferLeft;
     float* mCircularBufferRight;
@@ -72,10 +78,6 @@ private:
     float mDelayReadHead;
     float mFeedbackLeft;
     float mFeedbackRight;
-
-    juce::AudioParameterFloat* mDryWetParameter;
-    juce::AudioParameterFloat* mFeedbackParameter;
-    juce::AudioParameterFloat* mDelayTimeParameter;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FirstPluginAudioProcessor)
 };

@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <cmath>
 
 //==============================================================================
 FirstPluginAudioProcessor::FirstPluginAudioProcessor()
@@ -26,8 +27,9 @@ FirstPluginAudioProcessor::FirstPluginAudioProcessor()
     addParameter(mDryWetParameter = new juce::AudioParameterFloat("drywet", "Dry Wet", 0.0f, 1.0f, 0.5f));
     addParameter(mFeedbackParameter = new juce::AudioParameterFloat("feedback", "Feedback", 0.0f, 1.0f, 0.5f));
     addParameter(mDelayTimeParameter = new juce::AudioParameterFloat("delaytime", "Delay Time", 0.01f, MAX_DELAY_TIME, 0.5f));
+    mGainSmoothed = 0.0;
+    mDelayTimeSmoothed = 0.0;
 
-    mGainSmoothed = mGainParameter->get();
     mCircularBufferLeft = nullptr;
     mCircularBufferRight = nullptr;
     mCircularBufferWriteHead = 0;
@@ -117,7 +119,8 @@ void FirstPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    mDelayTimeInSamples = sampleRate * mDelayTimeParameter->get();
+    mGainSmoothed = mGainParameter->get();
+    mDelayTimeSmoothed = mDelayTimeParameter->get();
 
     mCircularBufferLength = sampleRate * MAX_DELAY_TIME;
     if (mCircularBufferLeft == nullptr) {
@@ -161,6 +164,11 @@ bool FirstPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 }
 #endif
 
+float FirstPluginAudioProcessor::lin_interp(float x1, float x2, float phase)
+{
+    return x1 + phase * (x2 - x1);
+}
+
 void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -185,8 +193,6 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     auto* channelLeft = buffer.getWritePointer(0);
     auto* channelRight = buffer.getWritePointer(1);
 
-    mDelayTimeInSamples = getSampleRate() * mDelayTimeParameter->get();
-
     // ..do something to the data...
     for (int sample = 0; sample < buffer.getNumSamples(); sample++)
     {
@@ -196,13 +202,24 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         mCircularBufferLeft[mCircularBufferWriteHead] = channelLeft[sample] + mFeedbackLeft;
         mCircularBufferRight[mCircularBufferWriteHead] = channelRight[sample] + mFeedbackRight;
 
+        mDelayTimeSmoothed -= 0.001 * (mDelayTimeSmoothed - mDelayTimeParameter->get());
+        mDelayTimeInSamples = getSampleRate() * mDelayTimeSmoothed;
         mDelayReadHead = mCircularBufferWriteHead - mDelayTimeInSamples;
         if (mDelayReadHead < 0) {
             mDelayReadHead += mCircularBufferLength;
         }
 
-        float delay_sample_left = mCircularBufferLeft[(int)mDelayReadHead];
-        float delay_sample_right = mCircularBufferRight[(int)mDelayReadHead];
+        int readHead_x1 = (int)mDelayReadHead;
+        int readHead_x2 = readHead_x1 + 1;
+        if (readHead_x2 >= mCircularBufferLength) {
+            readHead_x2 -= mCircularBufferLength;
+        }
+        float readHeadPhase = mDelayReadHead - readHead_x1;
+
+        float delay_sample_left = lin_interp(mCircularBufferLeft[readHead_x1], mCircularBufferLeft[readHead_x2], readHeadPhase);
+        float delay_sample_right = lin_interp(mCircularBufferRight[readHead_x1], mCircularBufferRight[readHead_x2], readHeadPhase);
+        // float delay_sample_left = mCircularBufferLeft[(int)mDelayReadHead];
+        // float delay_sample_right = mCircularBufferRight[(int)mDelayReadHead];
         mFeedbackLeft = delay_sample_left * mFeedbackParameter->get();
         mFeedbackRight = delay_sample_right * mFeedbackParameter->get();
 
