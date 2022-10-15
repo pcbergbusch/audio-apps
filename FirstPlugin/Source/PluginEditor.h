@@ -32,7 +32,10 @@ private:
     juce::Slider mGainControlSlider;
     juce::Slider mDryWetSlider;
     juce::Slider mFeedbackSlider;
-    juce::Slider mDelayTimeSlider;
+    juce::Slider mDepthSlider;
+    juce::Slider mRateSlider;
+    juce::Slider mPhaseOffsetSlider;
+    juce::ComboBox mTypeDropdown;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FirstPluginAudioProcessorEditor)
 };

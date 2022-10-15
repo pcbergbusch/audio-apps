@@ -21,8 +21,11 @@ FirstPluginAudioProcessorEditor::FirstPluginAudioProcessorEditor (FirstPluginAud
     juce::AudioParameterFloat* gainParameter = (juce::AudioParameterFloat*)params.getUnchecked(0);
     juce::AudioParameterFloat* dryWetParameter = (juce::AudioParameterFloat*)params.getUnchecked(1);
     juce::AudioParameterFloat* feedbackParameter = (juce::AudioParameterFloat*)params.getUnchecked(2);
-    juce::AudioParameterFloat* delayTimeParameter = (juce::AudioParameterFloat*)params.getUnchecked(3);
-
+    juce::AudioParameterFloat* depthParameter = (juce::AudioParameterFloat*)params.getUnchecked(3);
+    juce::AudioParameterFloat* rateParameter = (juce::AudioParameterFloat*)params.getUnchecked(4);
+    juce::AudioParameterFloat* phaseOffsetParameter = (juce::AudioParameterFloat*)params.getUnchecked(5);
+    juce::AudioParameterInt* typeParameter = (juce::AudioParameterInt*)params.getUnchecked(6);
+    
     mGainControlSlider.setBounds(0, 0, 100, 100);
     mGainControlSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     mGainControlSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
@@ -41,12 +44,24 @@ FirstPluginAudioProcessorEditor::FirstPluginAudioProcessorEditor (FirstPluginAud
     mFeedbackSlider.setRange(feedbackParameter->range.start, feedbackParameter->range.end);
     mFeedbackSlider.setValue(*feedbackParameter);
 
-    mDelayTimeSlider.setBounds(300, 0, 100, 100);
-    mDelayTimeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    mDelayTimeSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
-    mDelayTimeSlider.setRange(delayTimeParameter->range.start, delayTimeParameter->range.end);
-    mDelayTimeSlider.setValue(*delayTimeParameter);
-   
+    mDepthSlider.setBounds(0, 100, 100, 100);
+    mDepthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    mDepthSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+    mDepthSlider.setRange(depthParameter->range.start, depthParameter->range.end);
+    mDepthSlider.setValue(*depthParameter);
+
+    mRateSlider.setBounds(100, 100, 100, 100);
+    mRateSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    mRateSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+    mRateSlider.setRange(rateParameter->range.start, rateParameter->range.end);
+    mRateSlider.setValue(*rateParameter);
+
+    mPhaseOffsetSlider.setBounds(200, 100, 100, 100);
+    mPhaseOffsetSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    mPhaseOffsetSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+    mPhaseOffsetSlider.setRange(phaseOffsetParameter->range.start, phaseOffsetParameter->range.end);
+    mPhaseOffsetSlider.setValue(*phaseOffsetParameter);
+
     mGainControlSlider.onDragStart = [gainParameter] {gainParameter->beginChangeGesture();};
     mGainControlSlider.onValueChange = [this, gainParameter] {*gainParameter = mGainControlSlider.getValue();};
     mGainControlSlider.onDragEnd = [gainParameter] {gainParameter->endChangeGesture();};
@@ -62,10 +77,31 @@ FirstPluginAudioProcessorEditor::FirstPluginAudioProcessorEditor (FirstPluginAud
     mFeedbackSlider.onDragEnd = [feedbackParameter] {feedbackParameter->endChangeGesture(); };
     addAndMakeVisible(mFeedbackSlider);
 
-    mDelayTimeSlider.onDragStart = [delayTimeParameter] {delayTimeParameter->beginChangeGesture(); };
-    mDelayTimeSlider.onValueChange = [this, delayTimeParameter] {*delayTimeParameter = mDelayTimeSlider.getValue(); };
-    mDelayTimeSlider.onDragEnd = [delayTimeParameter] {delayTimeParameter->endChangeGesture(); };
-    addAndMakeVisible(mDelayTimeSlider);
+    mDepthSlider.onDragStart = [depthParameter] {depthParameter->beginChangeGesture(); };
+    mDepthSlider.onValueChange = [this, depthParameter] {*depthParameter = mDepthSlider.getValue(); };
+    mDepthSlider.onDragEnd = [depthParameter] {depthParameter->endChangeGesture(); };
+    addAndMakeVisible(mDepthSlider);
+
+    mRateSlider.onDragStart = [rateParameter] {rateParameter->beginChangeGesture(); };
+    mRateSlider.onValueChange = [this, rateParameter] {*rateParameter = mRateSlider.getValue(); };
+    mRateSlider.onDragEnd = [rateParameter] {rateParameter->endChangeGesture(); };
+    addAndMakeVisible(mRateSlider);
+
+    mPhaseOffsetSlider.onDragStart = [phaseOffsetParameter] {phaseOffsetParameter->beginChangeGesture(); };
+    mPhaseOffsetSlider.onValueChange = [this, phaseOffsetParameter] {*phaseOffsetParameter = mPhaseOffsetSlider.getValue(); };
+    mPhaseOffsetSlider.onDragEnd = [phaseOffsetParameter] {phaseOffsetParameter->endChangeGesture(); };
+    addAndMakeVisible(mPhaseOffsetSlider);
+
+    mTypeDropdown.setBounds(300, 100, 100, 100);
+    mTypeDropdown.addItem("Chorus", 1);
+    mTypeDropdown.addItem("Flanger", 2);
+    mTypeDropdown.setSelectedItemIndex(*typeParameter);
+    mTypeDropdown.onChange = [this, typeParameter] {
+        typeParameter->beginChangeGesture();
+        *typeParameter = mTypeDropdown.getSelectedItemIndex();
+        typeParameter->endChangeGesture();
+    };
+    addAndMakeVisible(mTypeDropdown);
 }
 
 FirstPluginAudioProcessorEditor::~FirstPluginAudioProcessorEditor()

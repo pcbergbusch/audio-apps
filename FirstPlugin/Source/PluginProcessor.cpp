@@ -6,6 +6,7 @@
   ==============================================================================
 */
 
+#define _USE_MATH_DEFINES
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include <cmath>
@@ -26,7 +27,10 @@ FirstPluginAudioProcessor::FirstPluginAudioProcessor()
     addParameter(mGainParameter = new juce::AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f));
     addParameter(mDryWetParameter = new juce::AudioParameterFloat("drywet", "Dry Wet", 0.0f, 1.0f, 0.5f));
     addParameter(mFeedbackParameter = new juce::AudioParameterFloat("feedback", "Feedback", 0.0f, 1.0f, 0.5f));
-    addParameter(mDelayTimeParameter = new juce::AudioParameterFloat("delaytime", "Delay Time", 0.01f, MAX_DELAY_TIME, 0.5f));
+    addParameter(mDepthParameter = new juce::AudioParameterFloat("depth", "Delay LFO Depth", 0.0f, 1.0f, 0.5f));
+    addParameter(mRateParameter = new juce::AudioParameterFloat("rate", "Delay LFO Rate", 0.0f, 20.0f, 10.0f));
+    addParameter(mPhaseOffsetParameter = new juce::AudioParameterFloat("phase", "Delay LFO Phase", 0.0f, 1.0f, 0.0f));
+    addParameter(mTypeParameter = new juce::AudioParameterInt("type", "Type", 1, 2, 1));
     mGainSmoothed = 0.0;
     mDelayTimeSmoothed = 0.0;
 
@@ -34,6 +38,7 @@ FirstPluginAudioProcessor::FirstPluginAudioProcessor()
     mCircularBufferRight = nullptr;
     mCircularBufferWriteHead = 0;
     mCircularBufferLength = 0;
+    mLFOPhase = 0.0;
     mDelayTimeInSamples = 0.0;
     mDelayReadHead = 0.0;
     mFeedbackLeft = 0.0;
@@ -120,7 +125,8 @@ void FirstPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     mGainSmoothed = mGainParameter->get();
-    mDelayTimeSmoothed = mDelayTimeParameter->get();
+    mDelayTimeSmoothed = 1.0;
+    mLFOPhase = 0.0;
 
     mCircularBufferLength = sampleRate * MAX_DELAY_TIME;
     if (mCircularBufferLeft == nullptr) {
@@ -175,6 +181,16 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    /*
+    DBG("mGainParameter: " << (juce::String&)mGainParameter);
+    DBG("mDryWetParameter:" << (juce::String&)mDryWetParameter);
+    DBG("mFeedbackParameter:" << (juce::String&)mFeedbackParameter);
+    DBG("mDepthParameter:" << (juce::String&)mDepthParameter);
+    DBG("mRateParameter:" << (juce::String&)mRateParameter);
+    DBG("mPhaseOffsetParameter:" << (juce::String&)mPhaseOffsetParameter);
+    DBG("mTypeParameter:" << (juce::String&)mTypeParameter);
+    */
+
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -196,13 +212,22 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     // ..do something to the data...
     for (int sample = 0; sample < buffer.getNumSamples(); sample++)
     {
+        // we want one full cycle, from [0, 2PI] radians, so mLFOPhase must range from [0, 1]
+        float lfoOut = sin(2.0 * M_PI * mLFOPhase);
+        mLFOPhase += *mRateParameter * getSampleRate();
+        if (mLFOPhase > 1.0) {
+            mLFOPhase -= 1.0;
+        }
+        // map the LFO ouptut range sin([0, 2PI]) = [-1, 1] to the range of delays we desire in seconds [0.005, 0.030]
+        float lfoOutMapped = juce::jmap(lfoOut, -1.0f, 1.0f, 0.005f, 0.030f);
+
         mGainSmoothed -= 0.004 * (mGainSmoothed - mGainParameter->get());
         channelLeft[sample] *= mGainSmoothed;
         channelRight[sample] *= mGainSmoothed;
         mCircularBufferLeft[mCircularBufferWriteHead] = channelLeft[sample] + mFeedbackLeft;
         mCircularBufferRight[mCircularBufferWriteHead] = channelRight[sample] + mFeedbackRight;
 
-        mDelayTimeSmoothed -= 0.001 * (mDelayTimeSmoothed - mDelayTimeParameter->get());
+        mDelayTimeSmoothed -= 0.001 * (mDelayTimeSmoothed - lfoOutMapped);
         mDelayTimeInSamples = getSampleRate() * mDelayTimeSmoothed;
         mDelayReadHead = mCircularBufferWriteHead - mDelayTimeInSamples;
         if (mDelayReadHead < 0) {
