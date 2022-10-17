@@ -212,10 +212,12 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     {
         // we want one full cycle, from [0, 2PI] radians, so mLFOPhase must range from [0, 1]
         float lfoOut = sin(2.0 * M_PI * mLFOPhase);
-        mLFOPhase += *mRateParameter * getSampleRate();
+        mLFOPhase += mRateParameter->get() / getSampleRate();
         if (mLFOPhase > 1.0) {
             mLFOPhase -= 1.0;
         }
+        lfoOut *= mDepthParameter->get();
+
         // map the LFO ouptut range sin([0, 2PI]) = [-1, 1] to the range of delays we desire in seconds [0.005, 0.030]
         float lfoOutMapped = juce::jmap(lfoOut, -1.0f, 1.0f, 0.005f, 0.030f);
 
