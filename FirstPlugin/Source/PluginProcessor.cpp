@@ -181,15 +181,13 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    /*
-    DBG("mGainParameter: " << (juce::String&)mGainParameter);
-    DBG("mDryWetParameter:" << (juce::String&)mDryWetParameter);
-    DBG("mFeedbackParameter:" << (juce::String&)mFeedbackParameter);
-    DBG("mDepthParameter:" << (juce::String&)mDepthParameter);
-    DBG("mRateParameter:" << (juce::String&)mRateParameter);
-    DBG("mPhaseOffsetParameter:" << (juce::String&)mPhaseOffsetParameter);
-    DBG("mTypeParameter:" << (juce::String&)mTypeParameter);
-    */
+    DBG("mGainParameter: " << mGainParameter->get());
+    DBG("mDryWetParameter:" << mDryWetParameter->get());
+    DBG("mFeedbackParameter:" << mFeedbackParameter->get());
+    DBG("mDepthParameter:" << mDepthParameter->get());
+    DBG("mRateParameter:" << mRateParameter->get());
+    DBG("mPhaseOffsetParameter:" << mPhaseOffsetParameter->get());
+    DBG("mTypeParameter:" << mTypeParameter->get());
 
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't

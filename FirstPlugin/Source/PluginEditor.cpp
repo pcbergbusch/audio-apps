@@ -95,10 +95,10 @@ FirstPluginAudioProcessorEditor::FirstPluginAudioProcessorEditor (FirstPluginAud
     mTypeDropdown.setBounds(300, 100, 100, 100);
     mTypeDropdown.addItem("Chorus", 1);
     mTypeDropdown.addItem("Flanger", 2);
-    mTypeDropdown.setSelectedItemIndex(*typeParameter);
+    mTypeDropdown.setSelectedId(*typeParameter);
     mTypeDropdown.onChange = [this, typeParameter] {
         typeParameter->beginChangeGesture();
-        *typeParameter = mTypeDropdown.getSelectedItemIndex();
+        *typeParameter = mTypeDropdown.getSelectedId();
         typeParameter->endChangeGesture();
     };
     addAndMakeVisible(mTypeDropdown);
