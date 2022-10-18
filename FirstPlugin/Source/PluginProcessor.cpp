@@ -32,15 +32,18 @@ FirstPluginAudioProcessor::FirstPluginAudioProcessor()
     addParameter(mPhaseOffsetParameter = new juce::AudioParameterFloat("phase", "Delay LFO Phase", 0.0f, 1.0f, 0.0f));
     addParameter(mTypeParameter = new juce::AudioParameterInt("type", "Type", 1, 2, 1));
     mGainSmoothed = 0.0;
-    mDelayTimeSmoothed = 0.0;
+    mDelayTimeSmoothedLeft = 0.0;
+    mDelayTimeSmoothedRight = 0.0;
 
     mCircularBufferLeft = nullptr;
     mCircularBufferRight = nullptr;
     mCircularBufferWriteHead = 0;
     mCircularBufferLength = 0;
     mLFOPhase = 0.0;
-    mDelayTimeInSamples = 0.0;
-    mDelayReadHead = 0.0;
+    mDelayTimeInSamplesLeft = 0.0;
+    mDelayTimeInSamplesRight = 0.0;
+    mDelayReadHeadLeft = 0.0;
+    mDelayReadHeadRight = 0.0;
     mFeedbackLeft = 0.0;
     mFeedbackRight = 0.0;
 }
@@ -125,15 +128,16 @@ void FirstPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     mGainSmoothed = mGainParameter->get();
-    mDelayTimeSmoothed = 1.0;
+    mDelayTimeSmoothedLeft = 1.0;
+    mDelayTimeSmoothedRight = 1.0;
     mLFOPhase = 0.0;
 
     mCircularBufferLength = sampleRate * MAX_DELAY_TIME;
     if (mCircularBufferLeft == nullptr) {
-        mCircularBufferLeft = new float[mCircularBufferLength]();
+        mCircularBufferLeft = new float[mCircularBufferLength] { 0 };
     }
     if (mCircularBufferRight == nullptr) {
-        mCircularBufferRight = new float[mCircularBufferLength]();
+        mCircularBufferRight = new float[mCircularBufferLength] { 0 };
     }
     mCircularBufferWriteHead = 0;
 }
@@ -211,15 +215,31 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     for (int sample = 0; sample < buffer.getNumSamples(); sample++)
     {
         // we want one full cycle, from [0, 2PI] radians, so mLFOPhase must range from [0, 1]
-        float lfoOut = sin(2.0 * M_PI * mLFOPhase);
+        float lfoOutLeft = sin(2.0 * M_PI * mLFOPhase);
+        lfoOutLeft *= mDepthParameter->get();
+        float lfoPhaseRight = mLFOPhase + mPhaseOffsetParameter->get();
+        if (lfoPhaseRight > 1.0) {
+            lfoPhaseRight -= 1.0;
+        }
+        float lfoOutRight = sin(2.0 * M_PI * lfoPhaseRight);
+        lfoOutRight *= mDepthParameter->get();
         mLFOPhase += mRateParameter->get() / getSampleRate();
         if (mLFOPhase > 1.0) {
             mLFOPhase -= 1.0;
         }
-        lfoOut *= mDepthParameter->get();
 
-        // map the LFO ouptut range sin([0, 2PI]) = [-1, 1] to the range of delays we desire in seconds [0.005, 0.030]
-        float lfoOutMapped = juce::jmap(lfoOut, -1.0f, 1.0f, 0.005f, 0.030f);
+        float lfoOutMappedLeft = 0.0;
+        float lfoOutMappedRight = 0.0;
+        // map the LFO ouptut range sin([0, 2PI]) = [-1, 1] to the range of delays we desire in seconds
+        // For chorus it is [0.005, 0.030]; for flanger it is [0.001, 0.005]
+        if (mTypeParameter->get() == 1) {
+            lfoOutMappedLeft = juce::jmap(lfoOutLeft, -1.0f, 1.0f, 0.005f, 0.030f);
+            lfoOutMappedRight = juce::jmap(lfoOutRight, -1.0f, 1.0f, 0.005f, 0.030f);
+        }
+        else {
+            lfoOutMappedLeft = juce::jmap(lfoOutLeft, -1.0f, 1.0f, 0.001f, 0.005f);
+            lfoOutMappedRight = juce::jmap(lfoOutRight, -1.0f, 1.0f, 0.001f, 0.005f);
+        }
 
         mGainSmoothed -= 0.004 * (mGainSmoothed - mGainParameter->get());
         channelLeft[sample] *= mGainSmoothed;
@@ -227,22 +247,34 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         mCircularBufferLeft[mCircularBufferWriteHead] = channelLeft[sample] + mFeedbackLeft;
         mCircularBufferRight[mCircularBufferWriteHead] = channelRight[sample] + mFeedbackRight;
 
-        mDelayTimeSmoothed -= 0.001 * (mDelayTimeSmoothed - lfoOutMapped);
-        mDelayTimeInSamples = getSampleRate() * mDelayTimeSmoothed;
-        mDelayReadHead = mCircularBufferWriteHead - mDelayTimeInSamples;
-        if (mDelayReadHead < 0) {
-            mDelayReadHead += mCircularBufferLength;
+        mDelayTimeSmoothedLeft -= 0.001 * (mDelayTimeSmoothedLeft - lfoOutMappedLeft);
+        mDelayTimeInSamplesLeft = getSampleRate() * mDelayTimeSmoothedLeft;
+        mDelayReadHeadLeft = mCircularBufferWriteHead - mDelayTimeInSamplesLeft;
+        if (mDelayReadHeadLeft < 0) {
+            mDelayReadHeadLeft += mCircularBufferLength;
+        }
+        mDelayTimeSmoothedRight -= 0.001 * (mDelayTimeSmoothedRight - lfoOutMappedRight);
+        mDelayTimeInSamplesRight = getSampleRate() * mDelayTimeSmoothedRight;
+        mDelayReadHeadRight = mCircularBufferWriteHead - mDelayTimeInSamplesRight;
+        if (mDelayReadHeadRight < 0) {
+            mDelayReadHeadRight += mCircularBufferLength;
         }
 
-        int readHead_x1 = (int)mDelayReadHead;
-        int readHead_x2 = readHead_x1 + 1;
-        if (readHead_x2 >= mCircularBufferLength) {
-            readHead_x2 -= mCircularBufferLength;
+        int readHead_x1l = (int)mDelayReadHeadLeft;
+        int readHead_x2l = readHead_x1l + 1;
+        if (readHead_x2l >= mCircularBufferLength) {
+            readHead_x2l -= mCircularBufferLength;
         }
-        float readHeadPhase = mDelayReadHead - readHead_x1;
+        float readHeadPhaseLeft = mDelayReadHeadLeft - readHead_x1l;
+        int readHead_x1r = (int)mDelayReadHeadRight;
+        int readHead_x2r = readHead_x1r + 1;
+        if (readHead_x2r >= mCircularBufferLength) {
+            readHead_x2r -= mCircularBufferLength;
+        }
+        float readHeadPhaseRight = mDelayReadHeadRight - readHead_x1r;
 
-        float delay_sample_left = lin_interp(mCircularBufferLeft[readHead_x1], mCircularBufferLeft[readHead_x2], readHeadPhase);
-        float delay_sample_right = lin_interp(mCircularBufferRight[readHead_x1], mCircularBufferRight[readHead_x2], readHeadPhase);
+        float delay_sample_left = lin_interp(mCircularBufferLeft[readHead_x1l], mCircularBufferLeft[readHead_x2l], readHeadPhaseLeft);
+        float delay_sample_right = lin_interp(mCircularBufferRight[readHead_x1r], mCircularBufferRight[readHead_x2r], readHeadPhaseRight);
         // float delay_sample_left = mCircularBufferLeft[(int)mDelayReadHead];
         // float delay_sample_right = mCircularBufferRight[(int)mDelayReadHead];
         mFeedbackLeft = delay_sample_left * mFeedbackParameter->get();
