@@ -63,39 +63,39 @@ FirstPluginAudioProcessorEditor::FirstPluginAudioProcessorEditor (FirstPluginAud
     mPhaseOffsetSlider.setValue(*phaseOffsetParameter);
 
     mGainControlSlider.onDragStart = [gainParameter] {gainParameter->beginChangeGesture();};
-    mGainControlSlider.onValueChange = [this, gainParameter] {*gainParameter = mGainControlSlider.getValue();};
+    mGainControlSlider.onValueChange = [this, gainParameter] {gainParameter->setValueNotifyingHost(mGainControlSlider.getValue()); };
     mGainControlSlider.onDragEnd = [gainParameter] {gainParameter->endChangeGesture();};
     addAndMakeVisible(mGainControlSlider);
 
     mDryWetSlider.onDragStart = [dryWetParameter] {dryWetParameter->beginChangeGesture(); };
-    mDryWetSlider.onValueChange = [this, dryWetParameter] {*dryWetParameter = mDryWetSlider.getValue(); };
+    mDryWetSlider.onValueChange = [this, dryWetParameter] {dryWetParameter->setValueNotifyingHost(mDryWetSlider.getValue()); };
     mDryWetSlider.onDragEnd = [dryWetParameter] {dryWetParameter->endChangeGesture(); };
     addAndMakeVisible(mDryWetSlider);
 
     mFeedbackSlider.onDragStart = [feedbackParameter] {feedbackParameter->beginChangeGesture(); };
-    mFeedbackSlider.onValueChange = [this, feedbackParameter] {*feedbackParameter = mFeedbackSlider.getValue(); };
+    mFeedbackSlider.onValueChange = [this, feedbackParameter] {feedbackParameter->setValueNotifyingHost(mFeedbackSlider.getValue()); };
     mFeedbackSlider.onDragEnd = [feedbackParameter] {feedbackParameter->endChangeGesture(); };
     addAndMakeVisible(mFeedbackSlider);
 
     mDepthSlider.onDragStart = [depthParameter] {depthParameter->beginChangeGesture(); };
-    mDepthSlider.onValueChange = [this, depthParameter] {*depthParameter = mDepthSlider.getValue(); };
+    mDepthSlider.onValueChange = [this, depthParameter] {depthParameter->setValueNotifyingHost(mDepthSlider.getValue()); };
     mDepthSlider.onDragEnd = [depthParameter] {depthParameter->endChangeGesture(); };
     addAndMakeVisible(mDepthSlider);
 
     mRateSlider.onDragStart = [rateParameter] {rateParameter->beginChangeGesture(); };
-    mRateSlider.onValueChange = [this, rateParameter] {*rateParameter = mRateSlider.getValue(); };
+    mRateSlider.onValueChange = [this, rateParameter] {rateParameter->setValueNotifyingHost(mRateSlider.getValue()); };
     mRateSlider.onDragEnd = [rateParameter] {rateParameter->endChangeGesture(); };
     addAndMakeVisible(mRateSlider);
 
     mPhaseOffsetSlider.onDragStart = [phaseOffsetParameter] {phaseOffsetParameter->beginChangeGesture(); };
-    mPhaseOffsetSlider.onValueChange = [this, phaseOffsetParameter] {*phaseOffsetParameter = mPhaseOffsetSlider.getValue(); };
+    mPhaseOffsetSlider.onValueChange = [this, phaseOffsetParameter] {phaseOffsetParameter->setValueNotifyingHost(mPhaseOffsetSlider.getValue()); };
     mPhaseOffsetSlider.onDragEnd = [phaseOffsetParameter] {phaseOffsetParameter->endChangeGesture(); };
     addAndMakeVisible(mPhaseOffsetSlider);
 
     mTypeDropdown.setBounds(300, 100, 100, 100);
     mTypeDropdown.addItem("Chorus", 1);
     mTypeDropdown.addItem("Flanger", 2);
-    mTypeDropdown.setSelectedId(*typeParameter);
+    mTypeDropdown.setSelectedId(typeParameter->get());
     mTypeDropdown.onChange = [this, typeParameter] {
         typeParameter->beginChangeGesture();
         *typeParameter = mTypeDropdown.getSelectedId();

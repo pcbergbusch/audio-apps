@@ -134,11 +134,14 @@ void FirstPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 
     mCircularBufferLength = sampleRate * MAX_DELAY_TIME;
     if (mCircularBufferLeft == nullptr) {
-        mCircularBufferLeft = new float[mCircularBufferLength] { 0 };
+        mCircularBufferLeft = new float[mCircularBufferLength];
     }
+    juce::zeromem(mCircularBufferLeft, mCircularBufferLength * sizeof(float));
     if (mCircularBufferRight == nullptr) {
-        mCircularBufferRight = new float[mCircularBufferLength] { 0 };
+        mCircularBufferRight = new float[mCircularBufferLength];
     }
+    juce::zeromem(mCircularBufferRight, mCircularBufferLength * sizeof(float));
+
     mCircularBufferWriteHead = 0;
 }
 
@@ -185,14 +188,6 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    DBG("mGainParameter: " << mGainParameter->get());
-    DBG("mDryWetParameter:" << mDryWetParameter->get());
-    DBG("mFeedbackParameter:" << mFeedbackParameter->get());
-    DBG("mDepthParameter:" << mDepthParameter->get());
-    DBG("mRateParameter:" << mRateParameter->get());
-    DBG("mPhaseOffsetParameter:" << mPhaseOffsetParameter->get());
-    DBG("mTypeParameter:" << mTypeParameter->get());
-
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -210,6 +205,8 @@ void FirstPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     // interleaved by keeping the same state.
     auto* channelLeft = buffer.getWritePointer(0);
     auto* channelRight = buffer.getWritePointer(1);
+
+    DBG("processBlock: " << mGainParameter->get());
 
     // ..do something to the data...
     for (int sample = 0; sample < buffer.getNumSamples(); sample++)
@@ -304,15 +301,37 @@ juce::AudioProcessorEditor* FirstPluginAudioProcessor::createEditor()
 //==============================================================================
 void FirstPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    std::unique_ptr<juce::XmlElement> xml(new juce::XmlElement("FlangerChorus"));
+    xml->setAttribute("Gain", mGainParameter->get());
+    xml->setAttribute("DryWet", mDryWetParameter->get());
+    xml->setAttribute("Feedback", mFeedbackParameter->get());
+    xml->setAttribute("Depth", mDepthParameter->get());
+    xml->setAttribute("Rate", mRateParameter->get());
+    xml->setAttribute("PhaseOffset", mPhaseOffsetParameter->get());
+    xml->setAttribute("Type", mTypeParameter->get());
+
+    AudioProcessor::copyXmlToBinary(*xml, destData);
+
+    DBG("getState - Gain: " << mGainParameter->get() << xml->getDoubleAttribute("Gain"));
+    DBG("getState - DryWet: " << mDryWetParameter->get() << xml->getDoubleAttribute("DryWet"));
+    DBG("getState - Feedback: " << mFeedbackParameter->get() << xml->getDoubleAttribute("Feedback"));
 }
 
 void FirstPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<juce::XmlElement> xml(AudioProcessor::getXmlFromBinary(data, sizeInBytes));
+    if ((xml != nullptr) && (xml->hasTagName("FlangerChorus"))) {
+        mGainParameter->setValueNotifyingHost(xml->getDoubleAttribute("Gain"));
+        mDryWetParameter->setValueNotifyingHost(xml->getDoubleAttribute("DryWet"));
+        mFeedbackParameter->setValueNotifyingHost(xml->getDoubleAttribute("Feedback"));
+        mDepthParameter->setValueNotifyingHost(xml->getDoubleAttribute("Depth"));
+        mRateParameter->setValueNotifyingHost(xml->getDoubleAttribute("Rate"));
+        mPhaseOffsetParameter->setValueNotifyingHost(xml->getDoubleAttribute("PhaseOffset"));
+        mTypeParameter->setValueNotifyingHost(xml->getIntAttribute("Type"));
+    }
+    DBG("setState - Gain: " << xml->getDoubleAttribute("Gain") << mGainParameter->get());
+    DBG("setState - DryWet: " << xml->getDoubleAttribute("DryWet") << mGainParameter->get());
+    DBG("setState - Feedback: " << xml->getDoubleAttribute("Feedback") << mGainParameter->get());
 }
 
 //==============================================================================
