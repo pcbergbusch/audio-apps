@@ -320,18 +320,18 @@ void FirstPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destData
 void FirstPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xml(AudioProcessor::getXmlFromBinary(data, sizeInBytes));
-    if ((xml != nullptr) && (xml->hasTagName("FlangerChorus"))) {
-        mGainParameter->setValueNotifyingHost(xml->getDoubleAttribute("Gain"));
-        mDryWetParameter->setValueNotifyingHost(xml->getDoubleAttribute("DryWet"));
-        mFeedbackParameter->setValueNotifyingHost(xml->getDoubleAttribute("Feedback"));
-        mDepthParameter->setValueNotifyingHost(xml->getDoubleAttribute("Depth"));
-        mRateParameter->setValueNotifyingHost(xml->getDoubleAttribute("Rate"));
-        mPhaseOffsetParameter->setValueNotifyingHost(xml->getDoubleAttribute("PhaseOffset"));
-        mTypeParameter->setValueNotifyingHost(xml->getIntAttribute("Type"));
+    if ((xml.get() != nullptr) && (xml->hasTagName("FlangerChorus"))) {
+        *mGainParameter = xml->getDoubleAttribute("Gain");
+        *mDryWetParameter = xml->getDoubleAttribute("DryWet");
+        *mFeedbackParameter = xml->getDoubleAttribute("Feedback");
+        *mDepthParameter = xml->getDoubleAttribute("Depth");
+        *mRateParameter = xml->getDoubleAttribute("Rate");
+        *mPhaseOffsetParameter = xml->getDoubleAttribute("PhaseOffset");
+        *mTypeParameter = xml->getIntAttribute("Type");
     }
     DBG("setState - Gain: " << xml->getDoubleAttribute("Gain") << mGainParameter->get());
-    DBG("setState - DryWet: " << xml->getDoubleAttribute("DryWet") << mGainParameter->get());
-    DBG("setState - Feedback: " << xml->getDoubleAttribute("Feedback") << mGainParameter->get());
+    DBG("setState - DryWet: " << xml->getDoubleAttribute("DryWet") << mDryWetParameter->get());
+    DBG("setState - Feedback: " << xml->getDoubleAttribute("Feedback") << mFeedbackParameter->get());
 }
 
 //==============================================================================
