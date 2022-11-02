@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "Gain.h"
+#include "Delay.h"
 
 //==============================================================================
 /**
@@ -58,9 +59,10 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
-    void initializeDSP();
     // juce::ScopedPointer<Gain> mGain[2];
     std::unique_ptr<Gain> mGain[2];
+    std::unique_ptr<Delay> mDelay[2];
+    void initializeDSP();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SecondPluginAudioProcessor);

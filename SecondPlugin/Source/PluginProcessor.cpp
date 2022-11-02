@@ -22,6 +22,7 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
                        )
 #endif
 {
+    initializeDSP();
 }
 
 SecondPluginAudioProcessor::~SecondPluginAudioProcessor()
@@ -95,12 +96,19 @@ void SecondPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    for (int i = 0; i < 2; i++) {
+        mDelay[i]->reset();
+        mDelay[i]->setSampleRate(sampleRate);
+    }
 }
 
 void SecondPluginAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
+    for (int i = 0; i < 2; i++) {
+        mDelay[i]->reset();
+    }
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -156,6 +164,7 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
         // ..do something to the data...
         mGain[channel]->process(channelData, 0.5, channelData, buffer.getNumSamples());
+        mDelay[channel]->process(channelData, 0.25, 0.0, 0.0, channelData, buffer.getNumSamples());
 
     }
 }
@@ -189,6 +198,7 @@ void SecondPluginAudioProcessor::initializeDSP()
 {
     for (int i = 0; i < 2; i++) {
         mGain[i] = std::make_unique<Gain>();
+        mDelay[i] = std::make_unique<Delay>();
     }
 }
 
