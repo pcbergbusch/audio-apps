@@ -164,7 +164,7 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
         // ..do something to the data...
         mGain[channel]->process(channelData, 0.5, channelData, buffer.getNumSamples());
-        mDelay[channel]->process(channelData, 0.25, 0.0, 0.0, channelData, buffer.getNumSamples());
+        mDelay[channel]->process(channelData, 0.2432, 0.0, 0.0, channelData, buffer.getNumSamples());
 
     }
 }

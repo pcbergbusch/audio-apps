@@ -48,17 +48,21 @@ void Delay::process(
     const float feedbackMapped = juce::jmap(inFeedback, 0.0f, 0.95f);
     const float delayTimeInSamples = inTime * mSampleRate;
     DBG(inTime);
+    DBG(mSampleRate);
+    DBG(delayTimeInSamples);
 
     for (int i = 0; i < inNumSamplesToRender; i++) {
-        const float delaySample = getInterpolatedSample(delayTimeInSamples);
+        // fill circular buffer with the current sample + desired feedback
         mBuffer[mDelayIndex] = inAudio[i] + mFeedbackSample * feedbackMapped;
-        outAudio[i] = inAudio[i] * dry + delaySample * wet;
+        // get the earlier sample that we want to delay and add it to the output and the feedback
+        const float delaySample = getInterpolatedSample(delayTimeInSamples);
         mFeedbackSample = delaySample;
+        outAudio[i] = inAudio[i] * dry + delaySample * wet;
+        // increment the circular buffer index
         mDelayIndex++;
         if (mDelayIndex >= maxBufferSizeForDelay) {
             mDelayIndex -= maxBufferSizeForDelay;
         }
-        DBG(outAudio[i], inAudio[i]);
     }
 }
 
@@ -67,7 +71,7 @@ double Delay::getInterpolatedSample(
 )
 {
     double readPosition = (double)mDelayIndex - inDelayTimeInSamples;
-    if (readPosition < 0.0f) {
+    if (readPosition < 0.0) {
         readPosition += maxBufferSizeForDelay;
     }
 
@@ -76,6 +80,12 @@ double Delay::getInterpolatedSample(
     if (readPosition2 >= maxBufferSizeForDelay) {
         readPosition2 -= maxBufferSizeForDelay;
     }
+    DBG(readPosition);
+    DBG(readPosition1);
+    DBG(readPosition2);
     double value = (mBuffer[readPosition2] - mBuffer[readPosition1]) * (readPosition - readPosition1) + mBuffer[readPosition1];
+    DBG(value);
+    DBG(mBuffer[readPosition1]);
+    DBG(mBuffer[readPosition2]);
     return value;
 }
