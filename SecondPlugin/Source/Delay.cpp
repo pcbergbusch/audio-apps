@@ -14,7 +14,8 @@
 Delay::Delay()
 :   mSampleRate(-1),
     mFeedbackSample(0.0),
-    mDelayIndex(0)
+    mDelayIndex(0),
+    mTimeSmoothed(0.0f)
 {
     
 }
@@ -31,7 +32,8 @@ void Delay::setSampleRate(double inSampleRate)
 
 void Delay::reset()
 {
-    juce::zeromem(mBuffer, sizeof(double) * maxBufferSizeForDelay);
+    mTimeSmoothed = 0.0f;
+    juce::zeromem(mBuffer, sizeof(double) * maxBufferSize);
 }
 
 void Delay::process(
@@ -39,6 +41,7 @@ void Delay::process(
     float inTime,
     float inFeedback,
     float inWetDry,
+    float* inModulationBuffer,
     float* outAudio,
     int inNumSamplesToRender
 )
@@ -46,9 +49,17 @@ void Delay::process(
     const float wet = inWetDry;
     const float dry = 1.0f - wet;
     const float feedbackMapped = juce::jmap(inFeedback, 0.0f, 0.95f);
-    const float delayTimeInSamples = inTime * mSampleRate;
+
+    // block-level smoothing: OK for audio parameters that are static, i.e., not modulated
+    // mTimeSmoothed = mTimeSmoothed - smoothingCoeffGeneric * (mTimeSmoothed - inTime);
 
     for (int i = 0; i < inNumSamplesToRender; i++) {
+        // sample-level smoothing: first modulate the parameter, then smooth the modulated value
+        const double delayTimeModulation = (inTime + (0.002 * inModulationBuffer[i]));
+        mTimeSmoothed = mTimeSmoothed - \
+            smoothingCoeffFine * (mTimeSmoothed - delayTimeModulation);
+        const float delayTimeInSamples = mTimeSmoothed * mSampleRate;
+
         // fill circular buffer with the current sample + desired feedback
         mBuffer[mDelayIndex] = inAudio[i] + mFeedbackSample * feedbackMapped;
         // get the earlier sample that we want to delay and add it to the output and the feedback
@@ -57,8 +68,8 @@ void Delay::process(
         outAudio[i] = inAudio[i] * dry + delaySample * wet;
         // increment the circular buffer index
         mDelayIndex++;
-        if (mDelayIndex >= maxBufferSizeForDelay) {
-            mDelayIndex -= maxBufferSizeForDelay;
+        if (mDelayIndex >= maxBufferSize) {
+            mDelayIndex -= maxBufferSize;
         }
     }
 }
@@ -69,13 +80,13 @@ double Delay::getInterpolatedSample(
 {
     double readPosition = (double)mDelayIndex - inDelayTimeInSamples;
     if (readPosition < 0.0) {
-        readPosition += maxBufferSizeForDelay;
+        readPosition += maxBufferSize;
     }
 
     int readPosition1 = (int)readPosition;
     int readPosition2 = readPosition1 + 1;
-    if (readPosition2 >= maxBufferSizeForDelay) {
-        readPosition2 -= maxBufferSizeForDelay;
+    if (readPosition2 >= maxBufferSize) {
+        readPosition2 -= maxBufferSize;
     }
     double value = (mBuffer[readPosition2] - mBuffer[readPosition1]) * (readPosition - readPosition1) + mBuffer[readPosition1];
     return value;

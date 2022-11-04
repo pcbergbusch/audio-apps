@@ -99,6 +99,8 @@ void SecondPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     for (int i = 0; i < 2; i++) {
         mDelay[i]->reset();
         mDelay[i]->setSampleRate(sampleRate);
+        mLFO[i]->reset();
+        mLFO[i]->setSampleRate(sampleRate);
     }
 }
 
@@ -108,6 +110,7 @@ void SecondPluginAudioProcessor::releaseResources()
     // spare memory, etc.
     for (int i = 0; i < 2; i++) {
         mDelay[i]->reset();
+        mLFO[i]->reset();
     }
 }
 
@@ -163,8 +166,28 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         auto* channelData = buffer.getWritePointer (channel);
 
         // ..do something to the data...
-        mGain[channel]->process(channelData, 0.5, channelData, buffer.getNumSamples());
-        mDelay[channel]->process(channelData, 0.2432, 0.8, 0.8, channelData, buffer.getNumSamples());
+        mGain[channel]->process(
+            channelData,
+            0.5f,
+            channelData,
+            buffer.getNumSamples()
+        );
+
+        mLFO[channel]->process(
+            (channel == 0) ? 0.0f : 0.25f,  // no osc on channel 0, only channel 1
+            1.0f,
+            buffer.getNumSamples()
+        );
+
+        mDelay[channel]->process(
+            channelData,
+            0.2432f,
+            0.8f,
+            0.8f,
+            mLFO[channel]->getBuffer(),
+            channelData,
+            buffer.getNumSamples()
+        );
 
     }
 }
@@ -199,6 +222,7 @@ void SecondPluginAudioProcessor::initializeDSP()
     for (int i = 0; i < 2; i++) {
         mGain[i] = std::make_unique<Gain>();
         mDelay[i] = std::make_unique<Delay>();
+        mLFO[i] = std::make_unique<LFO>();
     }
 }
 

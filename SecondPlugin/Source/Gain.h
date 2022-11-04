@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "AudioHelpers.h"
+
 class Gain 
 {
     public:

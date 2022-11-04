@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "Gain.h"
 #include "Delay.h"
+#include "Lfo.h"
 
 //==============================================================================
 /**
@@ -62,6 +63,7 @@ private:
     // juce::ScopedPointer<Gain> mGain[2];
     std::unique_ptr<Gain> mGain[2];
     std::unique_ptr<Delay> mDelay[2];
+    std::unique_ptr<LFO> mLFO[2];
     void initializeDSP();
 
     //==============================================================================
