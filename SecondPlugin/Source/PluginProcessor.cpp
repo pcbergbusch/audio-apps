@@ -174,7 +174,7 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         );
 
         mLFO[channel]->process(
-            (channel == 0) ? 0.0f : 0.25f,  // no osc on channel 0, only channel 1
+            (channel == 0) ? 0.0f : 0.25f,  // no osc on channel 0, only channel 1 -> chorus effect
             1.0f,
             buffer.getNumSamples()
         );
@@ -188,7 +188,6 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             channelData,
             buffer.getNumSamples()
         );
-
     }
 }
 
