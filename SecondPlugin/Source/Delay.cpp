@@ -47,9 +47,6 @@ void Delay::process(
     const float dry = 1.0f - wet;
     const float feedbackMapped = juce::jmap(inFeedback, 0.0f, 0.95f);
     const float delayTimeInSamples = inTime * mSampleRate;
-    DBG(inTime);
-    DBG(mSampleRate);
-    DBG(delayTimeInSamples);
 
     for (int i = 0; i < inNumSamplesToRender; i++) {
         // fill circular buffer with the current sample + desired feedback
@@ -80,12 +77,6 @@ double Delay::getInterpolatedSample(
     if (readPosition2 >= maxBufferSizeForDelay) {
         readPosition2 -= maxBufferSizeForDelay;
     }
-    DBG(readPosition);
-    DBG(readPosition1);
-    DBG(readPosition2);
     double value = (mBuffer[readPosition2] - mBuffer[readPosition1]) * (readPosition - readPosition1) + mBuffer[readPosition1];
-    DBG(value);
-    DBG(mBuffer[readPosition1]);
-    DBG(mBuffer[readPosition2]);
     return value;
 }
