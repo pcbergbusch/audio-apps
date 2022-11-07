@@ -9,3 +9,16 @@
 */
 
 #pragma once
+
+#include "BasePanel.h"
+
+class CenterPanelMenuBar
+    : public BasePanel
+{
+public:
+    CenterPanelMenuBar(SecondPluginAudioProcessor* inProcessor);
+    ~CenterPanelMenuBar();
+
+private:
+
+};

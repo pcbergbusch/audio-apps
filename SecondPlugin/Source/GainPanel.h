@@ -9,3 +9,16 @@
 */
 
 #pragma once
+
+#include "BasePanel.h"
+
+class GainPanel
+    : public BasePanel
+{
+public:
+    GainPanel(SecondPluginAudioProcessor* inProcessor);
+    ~GainPanel();
+
+private:
+    
+};

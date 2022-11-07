@@ -9,3 +9,18 @@
 */
 
 #pragma once
+
+#include "BasePanel.h"
+
+class TopPanel
+    : public BasePanel
+{
+public:
+    TopPanel(SecondPluginAudioProcessor* inProcessor);
+    ~TopPanel();
+
+    void paint(juce::Graphics& g) override;
+
+private:
+
+};

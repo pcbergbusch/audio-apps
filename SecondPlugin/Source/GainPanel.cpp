@@ -9,3 +9,14 @@
 */
 
 #include "GainPanel.h"
+
+GainPanel::GainPanel(SecondPluginAudioProcessor* inProcessor)
+    : BasePanel(inProcessor)
+{
+    setSize(GAIN_PANEL_WIDTH, GAIN_PANEL_HEIGHT);
+}
+
+GainPanel::~GainPanel()
+{
+
+}

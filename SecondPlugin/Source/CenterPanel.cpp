@@ -9,3 +9,18 @@
 */
 
 #include "CenterPanel.h"
+
+CenterPanel::CenterPanel(SecondPluginAudioProcessor* inProcessor)
+    : BasePanel(inProcessor)
+{
+    setSize(CENTER_PANEL_WIDTH, CENTER_PANEL_HEIGHT);
+    mMenuBar = new CenterPanelMenuBar(inProcessor);
+    mMenuBar->setTopLeftPosition(0, 0);
+    addAndMakeVisible(mMenuBar);
+
+}
+
+CenterPanel::~CenterPanel()
+{
+
+}

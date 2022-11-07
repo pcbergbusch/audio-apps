@@ -9,3 +9,17 @@
 */
 
 #pragma once
+
+#include "BasePanel.h"
+#include "CenterPanelMenuBar.h"
+
+class CenterPanel
+    : public BasePanel
+{
+public:
+    CenterPanel(SecondPluginAudioProcessor* inProcessor);
+    ~CenterPanel();
+
+private:
+    juce::ScopedPointer<CenterPanelMenuBar> mMenuBar;
+};
