@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "Parameters.h"
 
 //==============================================================================
 SecondPluginAudioProcessor::SecondPluginAudioProcessor()
@@ -19,7 +20,8 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+        parameters(*this, nullptr)
 #endif
 {
     initializeDSP();
@@ -168,22 +170,22 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         // ..do something to the data...
         mGain[channel]->process(
             channelData,
-            0.5f,
+            getParameter(Parameter_InputGain),
             channelData,
             buffer.getNumSamples()
         );
 
         mLFO[channel]->process(
-            (channel == 0) ? 0.0f : 0.25f,  // no osc on channel 0, only channel 1 -> chorus effect
-            1.0f,
+            (channel == 0) ? 0.0f : getParameter(Parameter_ModulationRate),  // no osc on channel 0, only channel 1 -> chorus effect
+            getParameter(Parameter_ModulationDepth),
             buffer.getNumSamples()
         );
 
         mDelay[channel]->process(
             channelData,
-            0.2432f,
-            0.8f,
-            0.8f,
+            getParameter(Parameter_DelayTime),
+            getParameter(Parameter_DelayFeedback),
+            getParameter(Parameter_DelayWetDry),
             mLFO[channel]->getBuffer(),
             channelData,
             buffer.getNumSamples()
@@ -214,6 +216,22 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+void SecondPluginAudioProcessor::initializeParameters()
+{
+    for (int i = 0; i < Parameter_TotalNumParameters; i++)
+    {
+        parameters.createAndAddParameter(
+            ParameterID[i],
+            ParameterID[i],
+            ParameterID[i],
+            juce::NormalisableRange<float>(0.0f, 1.0f),
+            0.5f,
+            nullptr,
+            nullptr
+        );
+    }
 }
 
 void SecondPluginAudioProcessor::initializeDSP()
