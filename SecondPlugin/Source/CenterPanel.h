@@ -12,6 +12,7 @@
 
 #include "BasePanel.h"
 #include "CenterPanelMenuBar.h"
+#include "FxPanel.h"
 
 class CenterPanel
     : public BasePanel
@@ -22,4 +23,5 @@ public:
 
 private:
     juce::ScopedPointer<CenterPanelMenuBar> mMenuBar;
+    juce::ScopedPointer<FxPanel> mFxPanel;
 };

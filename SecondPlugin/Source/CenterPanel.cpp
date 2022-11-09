@@ -18,6 +18,10 @@ CenterPanel::CenterPanel(SecondPluginAudioProcessor* inProcessor)
     mMenuBar->setTopLeftPosition(0, 0);
     addAndMakeVisible(mMenuBar);
 
+    mFxPanel = new FxPanel(inProcessor);
+    mFxPanel->setTopLeftPosition(0, CENTER_PANEL_MENU_BAR_HEIGHT);
+    addAndMakeVisible(mFxPanel);
+
 }
 
 CenterPanel::~CenterPanel()
