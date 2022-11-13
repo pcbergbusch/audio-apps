@@ -9,6 +9,7 @@
 */
 
 #include "GainPanel.h"
+#include "Parameters.h"
 
 GainPanel::GainPanel(SecondPluginAudioProcessor* inProcessor)
     : BasePanel(inProcessor)
@@ -19,4 +20,17 @@ GainPanel::GainPanel(SecondPluginAudioProcessor* inProcessor)
 GainPanel::~GainPanel()
 {
 
+}
+
+void GainPanel::setParameterID(int inParameterID)
+{
+    mSlider = std::make_unique<ParameterSlider>(mProcessor->parameters, parameterName[inParameterID]);
+    const int sliderSize = 54;
+    mSlider->setBounds(
+        int(getWidth() * 0.5 - sliderSize * 0.5),
+        int(getHeight() * 0.5 - sliderSize * 0.5),
+        sliderSize,
+        sliderSize
+    );
+    addAndMakeVisible(*mSlider);
 }

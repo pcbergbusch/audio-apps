@@ -23,7 +23,7 @@ LFO::~LFO()
 
 }
 
-void LFO::setSampleRate(double inSampleRate)
+void LFO::setSampleRate(float inSampleRate)
 {
     mSampleRate = inSampleRate;
 }
@@ -43,7 +43,7 @@ void LFO::process(float inRate, float inDepth, int inNumSamples)
         if (mPhase > 1.0f) {
             mPhase -= 1.0f;
         }
-        const float lfoPosition = sinf(mPhase * 2.0 * PI) * inDepth;
+        const float lfoPosition = sinf(mPhase * 2.0f * PI) * inDepth;
         mBuffer[i] = lfoPosition;
     }
 }

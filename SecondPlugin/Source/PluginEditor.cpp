@@ -16,8 +16,8 @@ SecondPluginAudioProcessorEditor::SecondPluginAudioProcessorEditor (SecondPlugin
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (MAIN_PANEL_WIDTH, MAIN_PANEL_HEIGHT);
-    mMainPanel = new MainPanel(&audioProcessor);
-    addAndMakeVisible(mMainPanel);
+    mMainPanel = std::make_unique<MainPanel>(&audioProcessor);
+    addAndMakeVisible(*mMainPanel);
 }
 
 SecondPluginAudioProcessorEditor::~SecondPluginAudioProcessorEditor()

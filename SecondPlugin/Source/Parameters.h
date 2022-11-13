@@ -12,27 +12,28 @@
 
 #include "JuceHeader.h"
 
-enum Parameter
+enum parameterID
 {
-    Parameter_InputGain = 0,
-    Parameter_DelayTime,
-    Parameter_DelayFeedback,
-    Parameter_DelayWetDry,
-    Parameter_DelayType,
-    Parameter_OutputGain,
-    Parameter_ModulationRate,
-    Parameter_ModulationDepth,
-    Parameter_TotalNumParameters
+    inputGain = 0,
+    delayTime,
+    delayFeedback,
+    delayWetDry,
+    delayType,
+    modulationRate,
+    modulationDepth,
+    outputGain
 };
 
-static juce::String ParameterID[Parameter_TotalNumParameters] =
+const static int totalNumParameters = 8;
+
+static juce::String parameterName[totalNumParameters] =
 {
     "Input Gain",
     "Time",
     "Feedback",
     "WetDry",
     "Type",
-    "Output Gain",
     "Modulation Rate",
     "Modulation Depth",
+    "Output Gain"
 };

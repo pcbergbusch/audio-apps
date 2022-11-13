@@ -18,7 +18,7 @@ class Delay
         Delay();
         ~Delay();
 
-        void setSampleRate(double inSampleRate);
+        void setSampleRate(float inSampleRate);
 
         void reset();
 
@@ -33,11 +33,11 @@ class Delay
         );
 
     private:
-        double mSampleRate;
-        double mBuffer[maxBufferSize];
-        double mFeedbackSample;
+        float mSampleRate;
+        float mBuffer[maxBufferSize];
+        float mFeedbackSample;
         int mDelayIndex;
         float mTimeSmoothed;
 
-        double getInterpolatedSample(float delayTimeInSamples);
+        float getInterpolatedSample(float delayTimeInSamples);
 };

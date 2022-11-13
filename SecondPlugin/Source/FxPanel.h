@@ -26,7 +26,7 @@ public:
     FxPanel(SecondPluginAudioProcessor* inProcessor);
     ~FxPanel();
 
-    void setFxPanelStyle(FxPanelStyle iNStyle);
+    void setFxPanelStyle(FxPanelStyle inStyle);
     void paint(juce::Graphics& g) override;
 
 private:

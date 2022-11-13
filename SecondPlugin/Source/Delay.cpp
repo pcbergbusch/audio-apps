@@ -15,7 +15,7 @@ Delay::Delay()
 :   mSampleRate(-1),
     mFeedbackSample(0.0),
     mDelayIndex(0),
-    mTimeSmoothed(0.0f)
+    mTimeSmoothed(0.0)
 {
     
 }
@@ -25,15 +25,15 @@ Delay::~Delay()
 
 }
 
-void Delay::setSampleRate(double inSampleRate)
+void Delay::setSampleRate(float inSampleRate)
 {
     mSampleRate = inSampleRate;
 }
 
 void Delay::reset()
 {
-    mTimeSmoothed = 0.0f;
-    juce::zeromem(mBuffer, sizeof(double) * maxBufferSize);
+    mTimeSmoothed = 0.0;
+    juce::zeromem(mBuffer, sizeof(float) * maxBufferSize);
 }
 
 void Delay::process(
@@ -55,7 +55,7 @@ void Delay::process(
 
     for (int i = 0; i < inNumSamplesToRender; i++) {
         // sample-level smoothing: first modulate the parameter, then smooth the modulated value
-        const double delayTimeModulation = (inTime + (0.002 * inModulationBuffer[i]));
+        const float delayTimeModulation = (inTime + (0.002f * inModulationBuffer[i]));
         mTimeSmoothed = mTimeSmoothed - \
             smoothingCoeffFine * (mTimeSmoothed - delayTimeModulation);
         const float delayTimeInSamples = mTimeSmoothed * mSampleRate;
@@ -74,11 +74,11 @@ void Delay::process(
     }
 }
 
-double Delay::getInterpolatedSample(
+float Delay::getInterpolatedSample(
     float inDelayTimeInSamples
 )
 {
-    double readPosition = (double)mDelayIndex - inDelayTimeInSamples;
+    float readPosition = mDelayIndex - inDelayTimeInSamples;
     if (readPosition < 0.0) {
         readPosition += maxBufferSize;
     }
@@ -88,6 +88,6 @@ double Delay::getInterpolatedSample(
     if (readPosition2 >= maxBufferSize) {
         readPosition2 -= maxBufferSize;
     }
-    double value = (mBuffer[readPosition2] - mBuffer[readPosition1]) * (readPosition - readPosition1) + mBuffer[readPosition1];
+    float value = (mBuffer[readPosition2] - mBuffer[readPosition1]) * (readPosition - readPosition1) + mBuffer[readPosition1];
     return value;
 }

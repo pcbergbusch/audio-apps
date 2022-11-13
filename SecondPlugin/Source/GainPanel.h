@@ -11,6 +11,7 @@
 #pragma once
 
 #include "BasePanel.h"
+#include "ParameterSlider.h"
 
 class GainPanel
     : public BasePanel
@@ -19,6 +20,8 @@ public:
     GainPanel(SecondPluginAudioProcessor* inProcessor);
     ~GainPanel();
 
+    void setParameterID(int inParameterID);
+
 private:
-    
+    std::unique_ptr<ParameterSlider> mSlider;
 };

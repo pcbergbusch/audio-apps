@@ -11,6 +11,7 @@
 #include "BasePanel.h"
 
 BasePanel::BasePanel(SecondPluginAudioProcessor* inProcessor)
+    : mProcessor(inProcessor)
 {
 
 }

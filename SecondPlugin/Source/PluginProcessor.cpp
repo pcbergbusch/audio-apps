@@ -8,7 +8,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Parameters.h"
 
 //==============================================================================
 SecondPluginAudioProcessor::SecondPluginAudioProcessor()
@@ -24,6 +23,7 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
         parameters(*this, nullptr)
 #endif
 {
+    initializeParameters();
     initializeDSP();
 }
 
@@ -165,28 +165,38 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // interleaved by keeping the same state.
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        auto* channelData = buffer.getWritePointer (channel);
+        auto* channelData = buffer.getWritePointer(channel);
 
         // ..do something to the data...
-        mGain[channel]->process(
-            channelData,
-            getParameter(Parameter_InputGain),
-            channelData,
-            buffer.getNumSamples()
-        );
+        int param = 0;
 
-        mLFO[channel]->process(
-            (channel == 0) ? 0.0f : getParameter(Parameter_ModulationRate),  // no osc on channel 0, only channel 1 -> chorus effect
-            getParameter(Parameter_ModulationDepth),
+        mGainInput[channel]->process(
+            channelData,
+            mParameters[param++]->get(),
+            channelData,
             buffer.getNumSamples()
         );
 
         mDelay[channel]->process(
             channelData,
-            getParameter(Parameter_DelayTime),
-            getParameter(Parameter_DelayFeedback),
-            getParameter(Parameter_DelayWetDry),
+            mParameters[param++]->get(),
+            mParameters[param++]->get(),
+            mParameters[param++]->get(),
             mLFO[channel]->getBuffer(),
+            channelData,
+            buffer.getNumSamples()
+        );
+        param++;
+
+        mLFO[channel]->process(
+            (channel == 0) ? 0.0f : mParameters[param++]->get(), // no osc on channel 0, only channel 1 -> chorus effect
+            mParameters[param++]->get(),
+            buffer.getNumSamples()
+        );
+
+        mGainOutput[channel]->process(
+            channelData,
+            mParameters[param++]->get(),
             channelData,
             buffer.getNumSamples()
         );
@@ -220,16 +230,14 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
 
 void SecondPluginAudioProcessor::initializeParameters()
 {
-    for (int i = 0; i < Parameter_TotalNumParameters; i++)
-    {
-        parameters.createAndAddParameter(
-            ParameterID[i],
-            ParameterID[i],
-            ParameterID[i],
-            juce::NormalisableRange<float>(0.0f, 1.0f),
-            0.5f,
-            nullptr,
-            nullptr
+    for (int i = 0; i < totalNumParameters; i++) {
+        addParameter(
+            mParameters[i] = new juce::AudioParameterFloat(
+                parameterName[i],
+                parameterName[i],
+                juce::NormalisableRange<float>(0.0f, 1.0f),
+                0.5f
+            )
         );
     }
 }
@@ -237,9 +245,10 @@ void SecondPluginAudioProcessor::initializeParameters()
 void SecondPluginAudioProcessor::initializeDSP()
 {
     for (int i = 0; i < 2; i++) {
-        mGain[i] = std::make_unique<Gain>();
+        mGainInput[i] = std::make_unique<Gain>();
         mDelay[i] = std::make_unique<Delay>();
         mLFO[i] = std::make_unique<LFO>();
+        mGainOutput[i] = std::make_unique<Gain>();
     }
 }
 

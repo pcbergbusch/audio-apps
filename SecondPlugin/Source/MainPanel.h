@@ -23,8 +23,8 @@ public:
     ~MainPanel();
 
 private:
-    juce::ScopedPointer<TopPanel> mTopPanel;
-    juce::ScopedPointer<GainPanel> mGainInputPanel;
-    juce::ScopedPointer<GainPanel> mGainOutputPanel;
-    juce::ScopedPointer<CenterPanel> mCenterPanel;
+    std::unique_ptr<TopPanel> mTopPanel;
+    std::unique_ptr<GainPanel> mGainInputPanel;
+    std::unique_ptr<GainPanel> mGainOutputPanel;
+    std::unique_ptr<CenterPanel> mCenterPanel;
 };

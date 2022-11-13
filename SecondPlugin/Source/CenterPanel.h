@@ -22,6 +22,6 @@ public:
     ~CenterPanel();
 
 private:
-    juce::ScopedPointer<CenterPanelMenuBar> mMenuBar;
-    juce::ScopedPointer<FxPanel> mFxPanel;
+    std::unique_ptr<CenterPanelMenuBar> mMenuBar;
+    std::unique_ptr<FxPanel> mFxPanel;
 };

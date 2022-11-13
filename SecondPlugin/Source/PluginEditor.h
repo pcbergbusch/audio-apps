@@ -31,7 +31,7 @@ private:
     SecondPluginAudioProcessor& audioProcessor;
 
     // std::unique_ptr<MainPanel> mMainPanel;
-    juce::ScopedPointer<MainPanel> mMainPanel;
+    std::unique_ptr<MainPanel> mMainPanel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SecondPluginAudioProcessorEditor)
 };

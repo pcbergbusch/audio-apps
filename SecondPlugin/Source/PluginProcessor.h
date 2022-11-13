@@ -12,6 +12,7 @@
 #include "Gain.h"
 #include "Delay.h"
 #include "Lfo.h"
+#include "Parameters.h"
 
 //==============================================================================
 /**
@@ -62,9 +63,12 @@ public:
 
 private:
     // juce::ScopedPointer<Gain> mGain[2];
-    std::unique_ptr<Gain> mGain[2];
+    std::unique_ptr<Gain> mGainInput[2];
     std::unique_ptr<Delay> mDelay[2];
     std::unique_ptr<LFO> mLFO[2];
+    std::unique_ptr<Gain> mGainOutput[2];
+    juce::AudioParameterFloat* mParameters[totalNumParameters];
+
     void initializeParameters();
     void initializeDSP();
 

@@ -14,14 +14,13 @@ CenterPanel::CenterPanel(SecondPluginAudioProcessor* inProcessor)
     : BasePanel(inProcessor)
 {
     setSize(CENTER_PANEL_WIDTH, CENTER_PANEL_HEIGHT);
-    mMenuBar = new CenterPanelMenuBar(inProcessor);
+    mMenuBar = std::make_unique<CenterPanelMenuBar>(inProcessor);
     mMenuBar->setTopLeftPosition(0, 0);
-    addAndMakeVisible(mMenuBar);
+    addAndMakeVisible(*mMenuBar);
 
-    mFxPanel = new FxPanel(inProcessor);
+    mFxPanel = std::make_unique<FxPanel>(inProcessor);
     mFxPanel->setTopLeftPosition(0, CENTER_PANEL_MENU_BAR_HEIGHT);
-    addAndMakeVisible(mFxPanel);
-
+    addAndMakeVisible(*mFxPanel);
 }
 
 CenterPanel::~CenterPanel()
