@@ -20,7 +20,7 @@ public:
     GainPanel(SecondPluginAudioProcessor* inProcessor);
     ~GainPanel();
 
-    void setParameterID(int inParameterID);
+    void setParameterID(ParameterID inParameterID);
 
 private:
     std::unique_ptr<ParameterSlider> mSlider;

@@ -20,7 +20,7 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ),
-        parameters(*this, nullptr)
+        apvst(*this, nullptr)
 #endif
 {
     initializeParameters();
@@ -230,7 +230,7 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
 
 void SecondPluginAudioProcessor::initializeParameters()
 {
-    for (int i = 0; i < totalNumParameters; i++) {
+    for (int i = 0; i < (int)ParameterID::numParameters; i++) {
         addParameter(
             mParameters[i] = new juce::AudioParameterFloat(
                 parameterName[i],

@@ -22,9 +22,9 @@ GainPanel::~GainPanel()
 
 }
 
-void GainPanel::setParameterID(int inParameterID)
+void GainPanel::setParameterID(ParameterID inParameterID)
 {
-    mSlider = std::make_unique<ParameterSlider>(mProcessor->parameters, parameterName[inParameterID]);
+    mSlider = std::make_unique<ParameterSlider>(mProcessor->apvst, parameterName[(int)inParameterID]);
     const int sliderSize = 54;
     mSlider->setBounds(
         int(getWidth() * 0.5 - sliderSize * 0.5),

@@ -22,12 +22,12 @@ MainPanel::MainPanel(SecondPluginAudioProcessor* inProcessor)
 
     mGainInputPanel = std::make_unique<GainPanel>(inProcessor);
     mGainInputPanel->setTopLeftPosition(0, TOP_PANEL_HEIGHT);
-    mGainInputPanel->setParameterID(parameterID::inputGain);
+    mGainInputPanel->setParameterID(ParameterID::inputGain);
     addAndMakeVisible(*mGainInputPanel);
 
     mGainOutputPanel = std::make_unique<GainPanel>(inProcessor);
     mGainOutputPanel->setTopLeftPosition(MAIN_PANEL_WIDTH - GAIN_PANEL_WIDTH, TOP_PANEL_HEIGHT);
-    mGainInputPanel->setParameterID(parameterID::outputGain);
+    mGainOutputPanel->setParameterID(ParameterID::outputGain);
     addAndMakeVisible(*mGainOutputPanel);
 
     mCenterPanel = std::make_unique<CenterPanel>(inProcessor);

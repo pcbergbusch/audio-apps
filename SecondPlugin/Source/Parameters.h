@@ -12,7 +12,7 @@
 
 #include "JuceHeader.h"
 
-enum parameterID
+enum class ParameterID
 {
     inputGain = 0,
     delayTime,
@@ -21,12 +21,11 @@ enum parameterID
     delayType,
     modulationRate,
     modulationDepth,
-    outputGain
+    outputGain,
+    numParameters
 };
 
-const static int totalNumParameters = 8;
-
-static juce::String parameterName[totalNumParameters] =
+static juce::String parameterName[(int)ParameterID::numParameters] =
 {
     "Input Gain",
     "Time",
