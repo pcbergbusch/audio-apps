@@ -11,12 +11,13 @@
 #pragma once
 
 #include "BasePanel.h"
+#include "ParameterSlider.h"
 
-enum FxPanelStyle
+enum class FxPanelStyle
 {
-    FxPanelStyle_Delay,
-    FxPanelStyle_Chorus,
-    FxPanelStyle_TotalNumStyles
+    delay,
+    chorus,
+    numStyles
 };
 
 class FxPanel
@@ -31,4 +32,5 @@ public:
 
 private:
     FxPanelStyle mStyle;
+    juce::OwnedArray<ParameterSlider> mSliders;
 };
