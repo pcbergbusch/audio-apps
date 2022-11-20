@@ -16,8 +16,9 @@ class ParameterSlider
     : public juce::Slider
 {
 public:
-    ParameterSlider(juce::AudioProcessorValueTreeState& stateToControl,
-                    const juce::String& inParameterID
+    ParameterSlider(
+        juce::AudioProcessorValueTreeState& stateToControl,
+        const juce::String& inParameterID
     );
 
     ~ParameterSlider();

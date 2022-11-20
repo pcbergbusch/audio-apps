@@ -21,6 +21,7 @@ public:
     CenterPanel(SecondPluginAudioProcessor* inProcessor);
     ~CenterPanel();
 
+
 private:
     std::unique_ptr<CenterPanelMenuBar> mMenuBar;
     std::unique_ptr<FxPanel> mFxPanel;

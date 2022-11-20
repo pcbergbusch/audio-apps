@@ -12,18 +12,18 @@
 //==============================================================================
 SecondPluginAudioProcessor::SecondPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       ),
-        apvst(*this, nullptr)
+    : AudioProcessor (
+        BusesProperties()
+        #if ! JucePlugin_IsMidiEffect
+            #if ! JucePlugin_IsSynth
+                .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+            #endif
+            .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+        #endif
+      )
 #endif
 {
-    initializeParameters();
+    apvst = std::make_unique<juce::AudioProcessorValueTreeState>(*this, nullptr, "PARAMETERS", createParameterLayout());
     initializeDSP();
 }
 
@@ -172,16 +172,17 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
         mGainInput[channel]->process(
             channelData,
-            mParameters[param++]->get(),
+            apvst->getParameter(parameterName[(int)ParameterID::inputGain])->getValue(),
             channelData,
             buffer.getNumSamples()
         );
 
         mDelay[channel]->process(
             channelData,
-            mParameters[param++]->get(),
-            mParameters[param++]->get(),
-            mParameters[param++]->get(),
+            apvst->getParameter(parameterName[(int)ParameterID::delayTime])->getValue(),
+            apvst->getParameter(parameterName[(int)ParameterID::delayFeedback])->getValue(),
+            apvst->getParameter(parameterName[(int)ParameterID::delayWetDry])->getValue(),
+            apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue(),
             mLFO[channel]->getBuffer(),
             channelData,
             buffer.getNumSamples()
@@ -189,14 +190,15 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         param++;
 
         mLFO[channel]->process(
-            (channel == 0) ? 0.0f : mParameters[param++]->get(), // no osc on channel 0, only channel 1 -> chorus effect
-            mParameters[param++]->get(),
+            // no osc on channel 0, only channel 1 -> chorus effect
+            (channel == 0) ? 0.0f : apvst->getParameter(parameterName[(int)ParameterID::modulationRate])->getValue(),
+            apvst->getParameter(parameterName[(int)ParameterID::modulationDepth])->getValue(),
             buffer.getNumSamples()
         );
 
         mGainOutput[channel]->process(
             channelData,
-            mParameters[param++]->get(),
+            apvst->getParameter(parameterName[(int)ParameterID::outputGain])->getValue(),
             channelData,
             buffer.getNumSamples()
         );
@@ -228,11 +230,13 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
     // whose contents will have been created by the getStateInformation() call.
 }
 
-void SecondPluginAudioProcessor::initializeParameters()
+juce::AudioProcessorValueTreeState::ParameterLayout SecondPluginAudioProcessor::createParameterLayout()
 {
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
     for (int i = 0; i < (int)ParameterID::numParameters; i++) {
-        addParameter(
-            mParameters[i] = new juce::AudioParameterFloat(
+        layout.add(
+            std::make_unique<juce::AudioParameterFloat>(
                 parameterName[i],
                 parameterName[i],
                 juce::NormalisableRange<float>(0.0f, 1.0f),
@@ -240,6 +244,8 @@ void SecondPluginAudioProcessor::initializeParameters()
             )
         );
     }
+
+    return layout;
 }
 
 void SecondPluginAudioProcessor::initializeDSP()

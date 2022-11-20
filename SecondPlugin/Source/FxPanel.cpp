@@ -12,10 +12,12 @@
 #include "Parameters.h"
 
 FxPanel::FxPanel(SecondPluginAudioProcessor* inProcessor)
-    : BasePanel(inProcessor)
+    : BasePanel(inProcessor),
+      juce::ComboBox::Listener()
 {
     setSize(FX_PANEL_WIDTH, FX_PANEL_HEIGHT);
-    setFxPanelStyle(FxPanelStyle::delay);
+    int currentStyle = mProcessor->apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue();
+    setFxPanelStyle((FxPanelStyle) currentStyle);
 }
 
 FxPanel::~FxPanel()
@@ -38,7 +40,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
         case (FxPanelStyle::delay):
         {
             ParameterSlider* time = new ParameterSlider(
-                mProcessor->apvst, parameterName[(int)ParameterID::delayTime]
+                *mProcessor->apvst, parameterName[(int)ParameterID::delayTime]
             );
             time->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*time);
@@ -46,7 +48,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             x += sliderSize * 2;
 
             ParameterSlider* feedback = new ParameterSlider(
-                mProcessor->apvst, parameterName[(int)ParameterID::delayFeedback]
+                *mProcessor->apvst, parameterName[(int)ParameterID::delayFeedback]
             );
             feedback->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*feedback);
@@ -54,7 +56,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             x += sliderSize * 2;
 
             ParameterSlider* wetDry = new ParameterSlider(
-                mProcessor->apvst, parameterName[(int)ParameterID::delayWetDry]
+                *mProcessor->apvst, parameterName[(int)ParameterID::delayWetDry]
             );
             wetDry->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*wetDry);
@@ -65,7 +67,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
         case (FxPanelStyle::chorus):
         {
             ParameterSlider* rate = new ParameterSlider(
-                mProcessor->apvst, parameterName[(int)ParameterID::modulationRate]
+                *mProcessor->apvst, parameterName[(int)ParameterID::modulationRate]
             );
             rate->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*rate);
@@ -73,7 +75,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             x += sliderSize * 2;
 
             ParameterSlider* depth = new ParameterSlider(
-                mProcessor->apvst, parameterName[(int)ParameterID::modulationDepth]
+                *mProcessor->apvst, parameterName[(int)ParameterID::modulationDepth]
             );
             depth->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*depth);
@@ -81,7 +83,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             x += sliderSize * 2;
 
             ParameterSlider* wetDry = new ParameterSlider(
-                mProcessor->apvst, parameterName[(int)ParameterID::delayWetDry]
+                *mProcessor->apvst, parameterName[(int)ParameterID::delayWetDry]
             );
             wetDry->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*wetDry);
@@ -92,10 +94,10 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
         case (FxPanelStyle::numStyles):
         default:
         {
-
             jassertfalse;
         } break;
     }
+    repaint();
 }
 
 void FxPanel::paint(juce::Graphics& g)
@@ -119,4 +121,10 @@ void FxPanel::paint(juce::Graphics& g)
             jassertfalse;
         } break;
     }
+}
+
+void FxPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
+{
+    FxPanelStyle style = (FxPanelStyle)comboBoxThatHasChanged->getSelectedItemIndex();
+    setFxPanelStyle(style);
 }

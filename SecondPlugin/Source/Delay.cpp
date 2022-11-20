@@ -41,6 +41,7 @@ void Delay::process(
     float inTime,
     float inFeedback,
     float inWetDry,
+    float inType,
     float* inModulationBuffer,
     float* outAudio,
     int inNumSamplesToRender
@@ -54,10 +55,17 @@ void Delay::process(
     // mTimeSmoothed = mTimeSmoothed - smoothingCoeffGeneric * (mTimeSmoothed - inTime);
 
     for (int i = 0; i < inNumSamplesToRender; i++) {
-        // sample-level smoothing: first modulate the parameter, then smooth the modulated value
-        const float delayTimeModulation = (inTime + (0.002f * inModulationBuffer[i]));
-        mTimeSmoothed = mTimeSmoothed - \
-            smoothingCoeffFine * (mTimeSmoothed - delayTimeModulation);
+
+        if ((int)inType == (int) DelayType::delay) {
+            mTimeSmoothed = mTimeSmoothed - \
+                smoothingCoeffFine * (mTimeSmoothed - inTime);
+        }
+        else {
+            // sample-level smoothing: first modulate the parameter, then smooth the modulated value
+            const float delayTimeModulation = (0.003f + (0.002f * inModulationBuffer[i]));
+            mTimeSmoothed = mTimeSmoothed - \
+                smoothingCoeffFine * (mTimeSmoothed - delayTimeModulation);
+        }
         const float delayTimeInSamples = mTimeSmoothed * mSampleRate;
 
         // fill circular buffer with the current sample + desired feedback

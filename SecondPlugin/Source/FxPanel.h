@@ -15,13 +15,14 @@
 
 enum class FxPanelStyle
 {
-    delay,
+    delay = 0,
     chorus,
     numStyles
 };
 
 class FxPanel
-    : public BasePanel
+    : public BasePanel,
+      public juce::ComboBox::Listener
 {
 public:
     FxPanel(SecondPluginAudioProcessor* inProcessor);
@@ -29,6 +30,7 @@ public:
 
     void setFxPanelStyle(FxPanelStyle inStyle);
     void paint(juce::Graphics& g) override;
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
 private:
     FxPanelStyle mStyle;

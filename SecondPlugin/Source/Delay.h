@@ -12,6 +12,12 @@
 
 #include "AudioHelpers.h"
 
+enum class DelayType
+{
+    delay = 0,
+    chorus
+};
+
 class Delay
 {
     public:
@@ -27,6 +33,7 @@ class Delay
             float inTime,
             float inFeedback,
             float inWetDry,
+            float inType,
             float* inModulationBuffer,
             float* outAudio,
             int numSamplesToRender
