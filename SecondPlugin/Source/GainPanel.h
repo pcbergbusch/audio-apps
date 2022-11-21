@@ -24,4 +24,5 @@ public:
 
 private:
     std::unique_ptr<ParameterSlider> mSlider;
+    std::unique_ptr<juce::Label> mSliderLabel;
 };

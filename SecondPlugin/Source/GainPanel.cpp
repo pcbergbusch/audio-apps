@@ -33,4 +33,8 @@ void GainPanel::setParameterID(ParameterID inParameterID)
         sliderSize
     );
     addAndMakeVisible(*mSlider);
+
+    mSliderLabel = std::make_unique<juce::Label>(parameterName[(int)inParameterID], parameterName[(int)inParameterID]);
+    mSliderLabel->attachToComponent(mSlider->getChildComponent(0), true);
+    addAndMakeVisible(*mSliderLabel);
 }
