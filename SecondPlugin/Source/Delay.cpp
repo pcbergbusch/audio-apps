@@ -56,7 +56,7 @@ void Delay::process(
 
     for (int i = 0; i < inNumSamplesToRender; i++) {
 
-        if ((int)inType == (int) DelayType::delay) {
+        if ((int) inType == (int) DelayType::delay) {
             mTimeSmoothed = mTimeSmoothed - \
                 smoothingCoeffFine * (mTimeSmoothed - inTime);
         }

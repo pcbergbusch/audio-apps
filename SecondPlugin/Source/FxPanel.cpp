@@ -10,13 +10,14 @@
 
 #include "FxPanel.h"
 #include "Parameters.h"
+#include "AudioHelpers.h"
 
 FxPanel::FxPanel(SecondPluginAudioProcessor* inProcessor)
     : BasePanel(inProcessor),
       juce::ComboBox::Listener()
 {
     setSize(FX_PANEL_WIDTH, FX_PANEL_HEIGHT);
-    int currentStyle = mProcessor->apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue();
+    const int currentStyle = mProcessor->apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue();
     setFxPanelStyle((FxPanelStyle) currentStyle);
 }
 
@@ -30,6 +31,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
     mStyle = inStyle;
 
     mSliders.clear();
+    mSliderLabels.clear();
 
     const int sliderSize = 56;
     int x = 130;
@@ -43,14 +45,18 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
                 *mProcessor->apvst, parameterName[(int)ParameterID::delayTime]
             );
             time->setBounds(x, y, sliderSize, sliderSize);
-            addAndMakeVisible(*time);
-            mSliders.add(time);
-            x += sliderSize * 2;
 
-            juce::Label* timeLabel = new juce::Label("", "that");
+            juce::Label* timeLabel = new juce::Label(
+                parameterName[(int)ParameterID::delayTime],
+                parameterName[(int)ParameterID::delayTime]
+            );
             timeLabel->attachToComponent(time->getParentComponent(), false);
+            
+            addAndMakeVisible(*time);
             /*addAndMakeVisible(timeLabel);*/
+            mSliders.add(time);
             mSliderLabels.add(timeLabel);
+            x += sliderSize * 2;
 
             ParameterSlider* feedback = new ParameterSlider(
                 *mProcessor->apvst, parameterName[(int)ParameterID::delayFeedback]
@@ -113,11 +119,11 @@ void FxPanel::paint(juce::Graphics& g)
     {
         case (FxPanelStyle::delay):
         {
-            g.drawFittedText("Delay", 0, 0, getWidth(), getHeight(), juce::Justification::centred, 1);
+            g.drawFittedText("DELAY", 0, 0, getWidth(), getHeight() * 0.75, juce::Justification::centred, 1);
         } break;
         case (FxPanelStyle::chorus):
         {
-            g.drawFittedText("Chorus", 0, 0, getWidth(), getHeight(), juce::Justification::centred, 1);
+            g.drawFittedText("CHORUS", 0, 0, getWidth(), getHeight() * 0.75, juce::Justification::centred, 1);
         } break;
         case (FxPanelStyle::numStyles):
         default:
@@ -125,6 +131,10 @@ void FxPanel::paint(juce::Graphics& g)
             g.drawFittedText("Wrong Place", 0, 0, getWidth(), getHeight(), juce::Justification::centred, 1);
             jassertfalse;
         } break;
+    }
+
+    for (int i = 0; i < mSliders.size(); i++) {
+        paintComponentLabel(g, mSliders[i]);
     }
 }
 

@@ -10,6 +10,7 @@
 
 #include "GainPanel.h"
 #include "Parameters.h"
+#include "AudioHelpers.h"
 
 GainPanel::GainPanel(SecondPluginAudioProcessor* inProcessor)
     : BasePanel(inProcessor)
@@ -24,7 +25,7 @@ GainPanel::~GainPanel()
 
 void GainPanel::setParameterID(ParameterID inParameterID)
 {
-    mSlider = std::make_unique<ParameterSlider>(*mProcessor->apvst, parameterName[(int)inParameterID]);
+    mSlider = new ParameterSlider(*mProcessor->apvst, parameterName[(int)inParameterID]);
     const int sliderSize = 54;
     mSlider->setBounds(
         int(getWidth() * 0.5 - sliderSize * 0.5),
@@ -32,16 +33,15 @@ void GainPanel::setParameterID(ParameterID inParameterID)
         sliderSize,
         sliderSize
     );
-    addAndMakeVisible(*mSlider);
+    addAndMakeVisible(mSlider);
 
-    mSliderLabel = std::make_unique<juce::Label>("", "that");
-    mSliderLabel->attachToComponent(mSlider->getParentComponent(), false);
-    addAndMakeVisible(*mSliderLabel);
+    mSliderLabel = new juce::Label(parameterName[(int) inParameterID], parameterName[(int) inParameterID]);
+    mSliderLabel->attachToComponent(mSlider, true);
 }
+
 
 void GainPanel::paint(juce::Graphics& g)
 {
     BasePanel::paint(g);
-
-    g.drawFittedText("Gain", 0, 30, getWidth(), getHeight(), juce::Justification::centred, 1);
+    paintComponentLabel(g, mSlider);
 }
