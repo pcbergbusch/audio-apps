@@ -47,6 +47,11 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             mSliders.add(time);
             x += sliderSize * 2;
 
+            juce::Label* timeLabel = new juce::Label("", "that");
+            timeLabel->attachToComponent(time->getParentComponent(), false);
+            /*addAndMakeVisible(timeLabel);*/
+            mSliderLabels.add(timeLabel);
+
             ParameterSlider* feedback = new ParameterSlider(
                 *mProcessor->apvst, parameterName[(int)ParameterID::delayFeedback]
             );

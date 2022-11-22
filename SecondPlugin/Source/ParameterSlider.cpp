@@ -12,15 +12,15 @@
 
 ParameterSlider::ParameterSlider(
     juce::AudioProcessorValueTreeState& stateToControl,
-    const juce::String& inParameterID
+    const juce::String& inParameterName
 )
-    : juce::Slider(inParameterID)
+    : juce::Slider(inParameterName)
 {
     setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
     setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, true, 0, 0);
     setRange(0.0f, 1.0f, 0.001f);
 
-    mAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(stateToControl, inParameterID, *this);
+    mAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(stateToControl, inParameterName, *this);
 }
 
 ParameterSlider::~ParameterSlider()

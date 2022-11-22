@@ -18,7 +18,7 @@ class ParameterComboBox
 public:
     ParameterComboBox(
         juce::AudioProcessorValueTreeState& stateToControl,
-        const juce::String& inParameterID
+        const juce::String& inParameterName
     );
 
     ~ParameterComboBox();

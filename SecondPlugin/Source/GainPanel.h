@@ -21,6 +21,7 @@ public:
     ~GainPanel();
 
     void setParameterID(ParameterID inParameterID);
+    void paint(juce::Graphics& g) override;
 
 private:
     std::unique_ptr<ParameterSlider> mSlider;

@@ -34,7 +34,14 @@ void GainPanel::setParameterID(ParameterID inParameterID)
     );
     addAndMakeVisible(*mSlider);
 
-    mSliderLabel = std::make_unique<juce::Label>(parameterName[(int)inParameterID], parameterName[(int)inParameterID]);
-    mSliderLabel->attachToComponent(mSlider->getChildComponent(0), true);
+    mSliderLabel = std::make_unique<juce::Label>("", "that");
+    mSliderLabel->attachToComponent(mSlider->getParentComponent(), false);
     addAndMakeVisible(*mSliderLabel);
+}
+
+void GainPanel::paint(juce::Graphics& g)
+{
+    BasePanel::paint(g);
+
+    g.drawFittedText("Gain", 0, 30, getWidth(), getHeight(), juce::Justification::centred, 1);
 }

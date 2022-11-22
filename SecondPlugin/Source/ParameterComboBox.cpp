@@ -12,11 +12,11 @@
 
 ParameterComboBox::ParameterComboBox(
     juce::AudioProcessorValueTreeState& stateToControl,
-    const juce::String& inParameterID
+    const juce::String& inParameterName
 )
-    : juce::ComboBox(inParameterID)
+    : juce::ComboBox(inParameterName)
 {
-    mAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(stateToControl, inParameterID, *this);
+    mAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(stateToControl, inParameterName, *this);
 }
 
 ParameterComboBox::~ParameterComboBox()
