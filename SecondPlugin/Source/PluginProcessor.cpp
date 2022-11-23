@@ -25,6 +25,7 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
 {
     apvst = std::make_unique<juce::AudioProcessorValueTreeState>(*this, nullptr, "PARAMETERS", createParameterLayout());
     initializeDSP();
+    mPresetManager = std::make_unique<PresetManager>(this);
 }
 
 SecondPluginAudioProcessor::~SecondPluginAudioProcessor()
