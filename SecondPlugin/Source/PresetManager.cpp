@@ -11,7 +11,8 @@
 #include "PresetManager.h"
 
 PresetManager::PresetManager(juce::AudioProcessor* inProcessor)
-    :mProcessor(inProcessor)
+    : mProcessor(inProcessor),
+      mCurrentPresetXml(nullptr)
 {
 
 }
@@ -38,7 +39,7 @@ void PresetManager::loadPresetFromXml(juce::XmlElement* inElement)
         const juce::String name = mCurrentPresetXml->getAttributeName(i);
         const float value = mCurrentPresetXml->getDoubleAttribute(name);
 
-        for (int j = 0; j > mProcessor->getNumParameters(); j++) {
+        for (int j = 0; j < mProcessor->getNumParameters(); j++) {
             if (mProcessor->getParameterName(j) == name) {
                 mProcessor->setParameterNotifyingHost(j, value);
             }

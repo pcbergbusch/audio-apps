@@ -223,12 +223,27 @@ void SecondPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    juce::XmlElement preset("StateInfo");
+    juce::XmlElement* presetBody = new juce::XmlElement("Preset");
+    mPresetManager->loadPresetFromXml(presetBody);
+    preset.addChildElement(presetBody);
+    copyXmlToBinary(preset, destData);
 }
 
 void SecondPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<juce::XmlElement> xmlState = getXmlFromBinary(data, sizeInBytes);
+    if (xmlState) {
+        forEachXmlChildElement(*xmlState, subChild) {
+            mPresetManager->loadPresetFromXml(subChild);
+        }
+    }
+    else {
+        jassertfalse;
+    }
+
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout SecondPluginAudioProcessor::createParameterLayout()
