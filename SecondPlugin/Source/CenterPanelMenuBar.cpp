@@ -24,7 +24,7 @@ CenterPanelMenuBar::CenterPanelMenuBar(SecondPluginAudioProcessor* inProcessor)
     mFxTypeComboBox->setBounds(getWidth() - width, 0, width, getHeight());
     mFxTypeComboBox->addItem("DELAY", 1);
     mFxTypeComboBox->addItem("CHORUS", 2);
-    int currentStyle = mProcessor->apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue();
+    int currentStyle = int(mProcessor->apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue());
     mFxTypeComboBox->setSelectedItemIndex(currentStyle);
     addAndMakeVisible(*mFxTypeComboBox);
 }

@@ -25,7 +25,6 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
 {
     apvst = std::make_unique<juce::AudioProcessorValueTreeState>(*this, nullptr, "PARAMETERS", createParameterLayout());
     initializeDSP();
-    mPresetManager = std::make_unique<PresetManager>(this);
 }
 
 SecondPluginAudioProcessor::~SecondPluginAudioProcessor()
@@ -223,11 +222,9 @@ void SecondPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    juce::XmlElement preset("StateInfo");
-    juce::XmlElement* presetBody = new juce::XmlElement("Preset");
-    mPresetManager->loadPresetFromXml(presetBody);
-    preset.addChildElement(presetBody);
-    copyXmlToBinary(preset, destData);
+    auto state = apvst->copyState();
+    std::unique_ptr<juce::XmlElement> xml = state.createXml();
+    copyXmlToBinary(*xml, destData);
 }
 
 void SecondPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
@@ -235,15 +232,10 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
     std::unique_ptr<juce::XmlElement> xmlState = getXmlFromBinary(data, sizeInBytes);
-    if (xmlState) {
-        forEachXmlChildElement(*xmlState, subChild) {
-            mPresetManager->loadPresetFromXml(subChild);
-        }
-    }
-    else {
-        jassertfalse;
-    }
 
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName(apvst->state.getType()))
+            apvst->replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout SecondPluginAudioProcessor::createParameterLayout()

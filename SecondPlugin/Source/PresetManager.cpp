@@ -9,8 +9,9 @@
 */
 
 #include "PresetManager.h"
+#include "Parameters.h"
 
-PresetManager::PresetManager(juce::AudioProcessor* inProcessor)
+PresetManager::PresetManager(SecondPluginAudioProcessor* inProcessor)
     : mProcessor(inProcessor),
       mCurrentPresetXml(nullptr)
 {
@@ -24,10 +25,11 @@ PresetManager::~PresetManager()
 
 void PresetManager::setPresetsForXml(juce::XmlElement* inElement)
 {
-    const int numParameters = mProcessor->getNumParameters();
-
-    for (int i = 0; i < mProcessor->getNumParameters(); i++) {
-        inElement->setAttribute(mProcessor->getParameterName(i), mProcessor->getParameter(i));
+    for (int i = 0; i < (int) ParameterID::numParameters; i++) {
+        inElement->setAttribute(
+            parameterName[i],
+            mProcessor->apvst->getParameter(parameterName[i])->getValue()
+        );
     }
 }
 
@@ -35,13 +37,13 @@ void PresetManager::loadPresetFromXml(juce::XmlElement* inElement)
 {
     mCurrentPresetXml = inElement;
 
-    for (int i = 0; i < mCurrentPresetXml->getNumAttributes(); i++) {
-        const juce::String name = mCurrentPresetXml->getAttributeName(i);
+    for (int j = 0; j < mCurrentPresetXml->getNumAttributes(); j++) {
+        const juce::String name = mCurrentPresetXml->getAttributeName(j);
         const float value = mCurrentPresetXml->getDoubleAttribute(name);
 
-        for (int j = 0; j < mProcessor->getNumParameters(); j++) {
-            if (mProcessor->getParameterName(j) == name) {
-                mProcessor->setParameterNotifyingHost(j, value);
+        for (int i = 0; i < (int)ParameterID::numParameters; i++) {
+            if (parameterName[i] == name) {
+                mProcessor->setParameterNotifyingHost(i, value);
             }
         }
     }

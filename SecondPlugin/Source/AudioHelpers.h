@@ -20,9 +20,9 @@ const static int maxBufferSize = 88200; // circular buffer must be longer than m
 
 inline void paintComponentLabel(juce::Graphics& g, juce::Component* inComponent)
 {
-    const int x = inComponent->getX() - inComponent->getWidth() * 0.25;
+    const int x = inComponent->getX() - int(inComponent->getWidth() * 0.25);
     const int y = inComponent->getY() + inComponent->getHeight();
-    const int width = inComponent->getWidth() * 1.5;
+    const int width = int(inComponent->getWidth() * 1.5);
     const int height = 20;
 
     const juce::String label = inComponent->getName();

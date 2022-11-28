@@ -17,7 +17,7 @@ FxPanel::FxPanel(SecondPluginAudioProcessor* inProcessor)
       juce::ComboBox::Listener()
 {
     setSize(FX_PANEL_WIDTH, FX_PANEL_HEIGHT);
-    const int currentStyle = mProcessor->apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue();
+    const int currentStyle = int(mProcessor->apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue());
     setFxPanelStyle((FxPanelStyle) currentStyle);
 }
 
@@ -35,7 +35,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
 
     const int sliderSize = 56;
     int x = 130;
-    int y = getHeight() * 0.5;
+    int y = int(getHeight() * 0.5);
 
     switch (mStyle)
     {
@@ -119,11 +119,11 @@ void FxPanel::paint(juce::Graphics& g)
     {
         case (FxPanelStyle::delay):
         {
-            g.drawFittedText("DELAY", 0, 0, getWidth(), getHeight() * 0.75, juce::Justification::centred, 1);
+            g.drawFittedText("DELAY", 0, 0, getWidth(), int(getHeight() * 0.75), juce::Justification::centred, 1);
         } break;
         case (FxPanelStyle::chorus):
         {
-            g.drawFittedText("CHORUS", 0, 0, getWidth(), getHeight() * 0.75, juce::Justification::centred, 1);
+            g.drawFittedText("CHORUS", 0, 0, getWidth(), int(getHeight() * 0.75), juce::Justification::centred, 1);
         } break;
         case (FxPanelStyle::numStyles):
         default:

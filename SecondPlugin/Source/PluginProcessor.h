@@ -13,7 +13,6 @@
 #include "Delay.h"
 #include "Lfo.h"
 #include "Parameters.h"
-#include "PresetManager.h"
 
 //==============================================================================
 /**
@@ -71,7 +70,6 @@ private:
     
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     void initializeDSP();
-    std::unique_ptr<PresetManager> mPresetManager;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SecondPluginAudioProcessor);

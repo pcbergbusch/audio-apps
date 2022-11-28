@@ -11,17 +11,18 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include "PluginProcessor.h"
 
 class PresetManager
 {
 public:
-    PresetManager(juce::AudioProcessor* inProcessor);
+    PresetManager(SecondPluginAudioProcessor* inProcessor);
     ~PresetManager();
 
     void setPresetsForXml(juce::XmlElement* inElement);
     void loadPresetFromXml(juce::XmlElement* inElement);
 
 private:
-    juce::AudioProcessor* mProcessor;
+    SecondPluginAudioProcessor* mProcessor;
     juce::XmlElement* mCurrentPresetXml;
 };
