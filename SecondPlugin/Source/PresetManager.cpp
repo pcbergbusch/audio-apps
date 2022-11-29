@@ -2,18 +2,16 @@
   ==============================================================================
 
     PresetManager.cpp
-    Created: 23 Nov 2022 11:17:55pm
+    Created: 29 Nov 2022 10:57:43pm
     Author:  pcber
 
   ==============================================================================
 */
 
 #include "PresetManager.h"
-#include "Parameters.h"
 
-PresetManager::PresetManager(SecondPluginAudioProcessor* inProcessor)
-    : mProcessor(inProcessor),
-      mCurrentPresetXml(nullptr)
+PresetManager::PresetManager(juce::AudioProcessorValueTreeState& apvts)
+    : mApvts(apvts), mCurrentPreset("this")
 {
 
 }
@@ -23,28 +21,37 @@ PresetManager::~PresetManager()
 
 }
 
-void PresetManager::setPresetsForXml(juce::XmlElement* inElement)
+void PresetManager::savePreset(const juce::String& presetName)
 {
-    for (int i = 0; i < (int) ParameterID::numParameters; i++) {
-        inElement->setAttribute(
-            parameterName[i],
-            mProcessor->apvst->getParameter(parameterName[i])->getValue()
-        );
-    }
+
 }
 
-void PresetManager::loadPresetFromXml(juce::XmlElement* inElement)
+void PresetManager::deletePreset(const juce::String& presetName)
 {
-    mCurrentPresetXml = inElement;
 
-    for (int j = 0; j < mCurrentPresetXml->getNumAttributes(); j++) {
-        const juce::String name = mCurrentPresetXml->getAttributeName(j);
-        const float value = mCurrentPresetXml->getDoubleAttribute(name);
+}
 
-        for (int i = 0; i < (int)ParameterID::numParameters; i++) {
-            if (parameterName[i] == name) {
-                mProcessor->setParameterNotifyingHost(i, value);
-            }
-        }
-    }
+void PresetManager::loadPreset(const juce::String& presetName)
+{
+
+}
+
+void PresetManager::loadNextPreset()
+{
+
+}
+
+void PresetManager::loadPreviousPreset()
+{
+
+}
+
+juce::StringArray PresetManager::getAllPresets() const
+{
+    return juce::StringArray("this");
+}
+
+juce::String PresetManager::getCurrentPreset() const
+{
+    return juce::String("that");
 }

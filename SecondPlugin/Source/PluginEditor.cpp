@@ -18,6 +18,7 @@ SecondPluginAudioProcessorEditor::SecondPluginAudioProcessorEditor (SecondPlugin
     setSize (MAIN_PANEL_WIDTH, MAIN_PANEL_HEIGHT);
     mMainPanel = std::make_unique<MainPanel>(&audioProcessor);
     addAndMakeVisible(*mMainPanel);
+    setResizable(true, true);
 }
 
 SecondPluginAudioProcessorEditor::~SecondPluginAudioProcessorEditor()
@@ -39,4 +40,5 @@ void SecondPluginAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
+    //mMainPanel->setBounds(getLocalBounds().removeFromTop(proportionOfHeight(0.1f)));
 }

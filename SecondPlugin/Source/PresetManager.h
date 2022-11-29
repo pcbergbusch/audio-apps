@@ -2,7 +2,7 @@
   ==============================================================================
 
     PresetManager.h
-    Created: 23 Nov 2022 11:17:55pm
+    Created: 29 Nov 2022 10:57:43pm
     Author:  pcber
 
   ==============================================================================
@@ -11,18 +11,22 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include "PluginProcessor.h"
 
 class PresetManager
 {
 public:
-    PresetManager(SecondPluginAudioProcessor* inProcessor);
+    PresetManager(juce::AudioProcessorValueTreeState& apvst);
     ~PresetManager();
 
-    void setPresetsForXml(juce::XmlElement* inElement);
-    void loadPresetFromXml(juce::XmlElement* inElement);
+    void savePreset(const juce::String& presetName);
+    void deletePreset(const juce::String& presetName);
+    void loadPreset(const juce::String& presetName);
+    void loadNextPreset();
+    void loadPreviousPreset();
+    juce::StringArray getAllPresets() const;
+    juce::String getCurrentPreset() const;
 
 private:
-    SecondPluginAudioProcessor* mProcessor;
-    juce::XmlElement* mCurrentPresetXml;
+    juce::String mCurrentPreset;
+    juce::AudioProcessorValueTreeState& mApvts;
 };
