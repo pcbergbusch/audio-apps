@@ -25,7 +25,7 @@ GainPanel::~GainPanel()
 
 void GainPanel::setParameterID(ParameterID inParameterID)
 {
-    mSlider = new ParameterSlider(*mProcessor->apvst, parameterName[(int)inParameterID]);
+    mSlider = new ParameterSlider(mProcessor->getValueTreeState(), parameterName[(int)inParameterID]);
     const int sliderSize = 54;
     mSlider->setBounds(
         int(getWidth() * 0.5 - sliderSize * 0.5),

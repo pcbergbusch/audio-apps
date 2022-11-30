@@ -13,6 +13,7 @@
 #include "Delay.h"
 #include "Lfo.h"
 #include "Parameters.h"
+#include "PresetManager.h"
 
 //==============================================================================
 /**
@@ -59,7 +60,9 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
-    std::unique_ptr<juce::AudioProcessorValueTreeState> apvst;
+
+    juce::AudioProcessorValueTreeState& getValueTreeState() { return mValueTreeState; };
+    PresetManager& getPresetManager() { return mPresetManager; };
 
 private:
     // juce::ScopedPointer<Gain> mGain[2];
@@ -67,6 +70,9 @@ private:
     std::unique_ptr<Delay> mDelay[2];
     std::unique_ptr<LFO> mLFO[2];
     std::unique_ptr<Gain> mGainOutput[2];
+
+    juce::AudioProcessorValueTreeState mValueTreeState;
+    PresetManager mPresetManager;
     
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     void initializeDSP();

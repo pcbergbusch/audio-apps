@@ -23,6 +23,8 @@ TopPanel::TopPanel(SecondPluginAudioProcessor* inProcessor)
     mPresetList.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     addAndMakeVisible(mPresetList);
     mPresetList.addListener(this);
+
+    loadPresetList();
 }
 
 TopPanel::~TopPanel()
@@ -47,14 +49,47 @@ void TopPanel::paint(juce::Graphics& g)
     );*/
 }
 
-void TopPanel::buttonClicked(juce::Button*)
+void TopPanel::buttonClicked(juce::Button* button)
 {
-
+    if (button == &mSaveButton)
+    {
+        mFileChooser = std::make_unique<juce::FileChooser>(
+            "Please enter the name of the preset to save",
+            PresetManager::defaultDirectory,
+            "*." + PresetManager::extension
+        );
+        mFileChooser->launchAsync(
+            juce::FileBrowserComponent::saveMode, [&](const juce::FileChooser& chooser)
+                {
+                    const auto resultFile = chooser.getResult();
+                    mProcessor->getPresetManager().savePreset(resultFile.getFileNameWithoutExtension());
+                    loadPresetList();
+                }
+        );
+    }
+    if (button == &mPreviousPresetButton)
+    {
+        const auto index = mProcessor->getPresetManager().loadPreviousPreset();
+        mPresetList.setSelectedItemIndex(index, juce::dontSendNotification);
+    }
+    if (button == &mNextPresetButton)
+    {
+        const auto index = mProcessor->getPresetManager().loadNextPreset();
+        mPresetList.setSelectedItemIndex(index, juce::dontSendNotification);
+    }
+    if (button == &mDeleteButton)
+    {
+        mProcessor->getPresetManager().deletePreset(mProcessor->getPresetManager().getCurrentPreset());
+        loadPresetList();
+    }
 }
 
-void TopPanel::comboBoxChanged(juce::ComboBox*)
+void TopPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
 {
-
+    if (comboBoxThatHasChanged == &mPresetList)
+    {
+        mProcessor->getPresetManager().loadPreset(mPresetList.getItemText(mPresetList.getSelectedItemIndex()));
+    }
 }
 
 void TopPanel::configureButton(juce::Button& button, const juce::String& buttonText)
@@ -63,6 +98,15 @@ void TopPanel::configureButton(juce::Button& button, const juce::String& buttonT
     button.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     addAndMakeVisible(button);
     button.addListener(this);
+}
+
+void TopPanel::loadPresetList()
+{
+    mPresetList.clear(juce::dontSendNotification);
+    const auto allPresets = mProcessor->getPresetManager().getAllPresets();
+    const auto currentPreset = mProcessor->getPresetManager().getCurrentPreset();
+    mPresetList.addItemList(allPresets, 1);
+    mPresetList.setSelectedItemIndex(allPresets.indexOf(currentPreset), juce::dontSendNotification);
 }
 
 void TopPanel::resized()

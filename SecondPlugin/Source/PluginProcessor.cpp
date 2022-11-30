@@ -20,10 +20,11 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
             #endif
             .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
         #endif
-      )
+      ),
+      mValueTreeState(*this, nullptr, "PARAMETERS", createParameterLayout()),
+      mPresetManager(mValueTreeState)
 #endif
 {
-    apvst = std::make_unique<juce::AudioProcessorValueTreeState>(*this, nullptr, "PARAMETERS", createParameterLayout());
     initializeDSP();
 }
 
@@ -172,17 +173,17 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
         mGainInput[channel]->process(
             channelData,
-            apvst->getParameter(parameterName[(int)ParameterID::inputGain])->getValue(),
+            mValueTreeState.getParameter(parameterName[(int)ParameterID::inputGain])->getValue(),
             channelData,
             buffer.getNumSamples()
         );
 
         mDelay[channel]->process(
             channelData,
-            apvst->getParameter(parameterName[(int)ParameterID::delayTime])->getValue(),
-            apvst->getParameter(parameterName[(int)ParameterID::delayFeedback])->getValue(),
-            apvst->getParameter(parameterName[(int)ParameterID::delayWetDry])->getValue(),
-            apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue(),
+            mValueTreeState.getParameter(parameterName[(int)ParameterID::delayTime])->getValue(),
+            mValueTreeState.getParameter(parameterName[(int)ParameterID::delayFeedback])->getValue(),
+            mValueTreeState.getParameter(parameterName[(int)ParameterID::delayWetDry])->getValue(),
+            mValueTreeState.getParameter(parameterName[(int)ParameterID::delayType])->getValue(),
             mLFO[channel]->getBuffer(),
             channelData,
             buffer.getNumSamples()
@@ -191,14 +192,14 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
         mLFO[channel]->process(
             // no osc on channel 0, only channel 1 -> chorus effect
-            (channel == 0) ? 0.0f : apvst->getParameter(parameterName[(int)ParameterID::modulationRate])->getValue(),
-            apvst->getParameter(parameterName[(int)ParameterID::modulationDepth])->getValue(),
+            (channel == 0) ? 0.0f : mValueTreeState.getParameter(parameterName[(int)ParameterID::modulationRate])->getValue(),
+            mValueTreeState.getParameter(parameterName[(int)ParameterID::modulationDepth])->getValue(),
             buffer.getNumSamples()
         );
 
         mGainOutput[channel]->process(
             channelData,
-            apvst->getParameter(parameterName[(int)ParameterID::outputGain])->getValue(),
+            mValueTreeState.getParameter(parameterName[(int)ParameterID::outputGain])->getValue(),
             channelData,
             buffer.getNumSamples()
         );
@@ -222,7 +223,7 @@ void SecondPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    auto state = apvst->copyState();
+    auto state = mValueTreeState.copyState();
     std::unique_ptr<juce::XmlElement> xml = state.createXml();
     copyXmlToBinary(*xml, destData);
 }
@@ -234,8 +235,8 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
     std::unique_ptr<juce::XmlElement> xmlState = getXmlFromBinary(data, sizeInBytes);
 
     if (xmlState.get() != nullptr)
-        if (xmlState->hasTagName(apvst->state.getType()))
-            apvst->replaceState(juce::ValueTree::fromXml(*xmlState));
+        if (xmlState->hasTagName(mValueTreeState.state.getType()))
+            mValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout SecondPluginAudioProcessor::createParameterLayout()

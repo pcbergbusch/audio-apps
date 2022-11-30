@@ -26,10 +26,12 @@ private:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
     void configureButton(juce::Button& button, const juce::String& buttonText);
+    void loadPresetList();
     void resized() override;
 
     juce::TextButton mSaveButton, mDeleteButton, mPreviousPresetButton, mNextPresetButton;
     juce::ComboBox mPresetList;
+    std::unique_ptr<juce::FileChooser> mFileChooser;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TopPanel);
 };

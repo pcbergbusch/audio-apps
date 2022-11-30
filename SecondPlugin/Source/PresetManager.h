@@ -15,18 +15,21 @@
 class PresetManager
 {
 public:
-    PresetManager(juce::AudioProcessorValueTreeState& apvst);
+    static const juce::File defaultDirectory;
+    static const juce::String extension;
+
+    PresetManager(juce::AudioProcessorValueTreeState& valueTreeState);
     ~PresetManager();
 
     void savePreset(const juce::String& presetName);
     void deletePreset(const juce::String& presetName);
     void loadPreset(const juce::String& presetName);
-    void loadNextPreset();
-    void loadPreviousPreset();
+    int loadNextPreset();
+    int loadPreviousPreset();
     juce::StringArray getAllPresets() const;
     juce::String getCurrentPreset() const;
 
 private:
     juce::String mCurrentPreset;
-    juce::AudioProcessorValueTreeState& mApvts;
+    juce::AudioProcessorValueTreeState& mValueTreeState;
 };

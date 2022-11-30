@@ -17,7 +17,7 @@ FxPanel::FxPanel(SecondPluginAudioProcessor* inProcessor)
       juce::ComboBox::Listener()
 {
     setSize(FX_PANEL_WIDTH, FX_PANEL_HEIGHT);
-    const int currentStyle = int(mProcessor->apvst->getParameter(parameterName[(int)ParameterID::delayType])->getValue());
+    const int currentStyle = int(mProcessor->getValueTreeState().getParameter(parameterName[(int)ParameterID::delayType])->getValue());
     setFxPanelStyle((FxPanelStyle) currentStyle);
 }
 
@@ -42,7 +42,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
         case (FxPanelStyle::delay):
         {
             ParameterSlider* time = new ParameterSlider(
-                *mProcessor->apvst, parameterName[(int)ParameterID::delayTime]
+                mProcessor->getValueTreeState(), parameterName[(int)ParameterID::delayTime]
             );
             time->setBounds(x, y, sliderSize, sliderSize);
 
@@ -59,7 +59,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             x += sliderSize * 2;
 
             ParameterSlider* feedback = new ParameterSlider(
-                *mProcessor->apvst, parameterName[(int)ParameterID::delayFeedback]
+                mProcessor->getValueTreeState(), parameterName[(int)ParameterID::delayFeedback]
             );
             feedback->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*feedback);
@@ -67,7 +67,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             x += sliderSize * 2;
 
             ParameterSlider* wetDry = new ParameterSlider(
-                *mProcessor->apvst, parameterName[(int)ParameterID::delayWetDry]
+                mProcessor->getValueTreeState(), parameterName[(int)ParameterID::delayWetDry]
             );
             wetDry->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*wetDry);
@@ -78,7 +78,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
         case (FxPanelStyle::chorus):
         {
             ParameterSlider* rate = new ParameterSlider(
-                *mProcessor->apvst, parameterName[(int)ParameterID::modulationRate]
+                mProcessor->getValueTreeState(), parameterName[(int)ParameterID::modulationRate]
             );
             rate->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*rate);
@@ -86,7 +86,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             x += sliderSize * 2;
 
             ParameterSlider* depth = new ParameterSlider(
-                *mProcessor->apvst, parameterName[(int)ParameterID::modulationDepth]
+                mProcessor->getValueTreeState(), parameterName[(int)ParameterID::modulationDepth]
             );
             depth->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*depth);
@@ -94,7 +94,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             x += sliderSize * 2;
 
             ParameterSlider* wetDry = new ParameterSlider(
-                *mProcessor->apvst, parameterName[(int)ParameterID::delayWetDry]
+                mProcessor->getValueTreeState(), parameterName[(int)ParameterID::delayWetDry]
             );
             wetDry->setBounds(x, y, sliderSize, sliderSize);
             addAndMakeVisible(*wetDry);
