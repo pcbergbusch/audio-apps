@@ -12,11 +12,12 @@
 
 #include "JuceHeader.h"
 
-class PresetManager
+class PresetManager : public juce::ValueTree::Listener
 {
 public:
     static const juce::File defaultDirectory;
     static const juce::String extension;
+    static const juce::String presetNameProperty;
 
     PresetManager(juce::AudioProcessorValueTreeState& valueTreeState);
     ~PresetManager();
@@ -30,6 +31,7 @@ public:
     juce::String getCurrentPreset() const;
 
 private:
-    juce::String mCurrentPreset;
+    void valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged) override;
+    juce::Value mCurrentPreset;
     juce::AudioProcessorValueTreeState& mValueTreeState;
 };

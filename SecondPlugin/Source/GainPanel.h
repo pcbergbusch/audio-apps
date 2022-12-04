@@ -25,5 +25,5 @@ public:
 
 private:
     juce::ScopedPointer<ParameterSlider> mSlider;
-    juce::ScopedPointer<juce::Label> mSliderLabel;
+    //juce::ScopedPointer<juce::Label> mSliderLabel;
 };

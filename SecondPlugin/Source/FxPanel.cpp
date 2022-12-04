@@ -31,7 +31,7 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
     mStyle = inStyle;
 
     mSliders.clear();
-    mSliderLabels.clear();
+    //mSliderLabels.clear();
 
     const int sliderSize = 56;
     int x = 130;
@@ -46,16 +46,15 @@ void FxPanel::setFxPanelStyle(FxPanelStyle inStyle)
             );
             time->setBounds(x, y, sliderSize, sliderSize);
 
-            juce::Label* timeLabel = new juce::Label(
-                parameterName[(int)ParameterID::delayTime],
-                parameterName[(int)ParameterID::delayTime]
-            );
-            timeLabel->attachToComponent(time->getParentComponent(), false);
+            //juce::Label* timeLabel = new juce::Label(
+            //    parameterName[(int)ParameterID::delayTime],
+            //    parameterName[(int)ParameterID::delayTime]
+            //);
+            //timeLabel->attachToComponent(time->getParentComponent(), false);
             
             addAndMakeVisible(*time);
-            /*addAndMakeVisible(timeLabel);*/
             mSliders.add(time);
-            mSliderLabels.add(timeLabel);
+            //mSliderLabels.add(timeLabel);
             x += sliderSize * 2;
 
             ParameterSlider* feedback = new ParameterSlider(

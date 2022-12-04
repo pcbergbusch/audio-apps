@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "PresetManager.h"
 
 //==============================================================================
 SecondPluginAudioProcessor::SecondPluginAudioProcessor()
@@ -21,10 +22,12 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
             .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
         #endif
       ),
-      mValueTreeState(*this, nullptr, "PARAMETERS", createParameterLayout()),
-      mPresetManager(mValueTreeState)
+      mValueTreeState(*this, nullptr, "PARAMETERS", createParameterLayout())
 #endif
 {
+    mValueTreeState.state.setProperty(PresetManager::presetNameProperty, "", nullptr);
+    mValueTreeState.state.setProperty("version", ProjectInfo::versionString, nullptr);
+    mPresetManager = std::make_unique<PresetManager>(mValueTreeState);
     initializeDSP();
 }
 

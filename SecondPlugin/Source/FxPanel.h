@@ -35,5 +35,5 @@ public:
 private:
     FxPanelStyle mStyle;
     juce::OwnedArray<ParameterSlider> mSliders;
-    juce::OwnedArray<juce::Label> mSliderLabels;
+    //juce::OwnedArray<juce::Label> mSliderLabels;
 };

@@ -18,6 +18,8 @@ const juce::File PresetManager::defaultDirectory{ juce::File::getSpecialLocation
 
 const juce::String PresetManager::extension{ "preset" };
 
+const juce::String PresetManager::presetNameProperty{ "presetName" };
+
 PresetManager::PresetManager(juce::AudioProcessorValueTreeState& valueTreeState)
     : mValueTreeState(valueTreeState)
 {
@@ -31,6 +33,9 @@ PresetManager::PresetManager(juce::AudioProcessorValueTreeState& valueTreeState)
             jassertfalse;
         }
     }
+
+    mValueTreeState.state.addListener(this);
+    mCurrentPreset.referTo(mValueTreeState.state.getPropertyAsValue(presetNameProperty, nullptr));
 }
 
 PresetManager::~PresetManager()
@@ -43,6 +48,7 @@ void PresetManager::savePreset(const juce::String& presetName)
     if (presetName.isEmpty())
         return;
     
+    mCurrentPreset.setValue(presetName);
     const auto xml = mValueTreeState.copyState().createXml();
     const auto presetFile = defaultDirectory.getChildFile(presetName + "." + extension);
     if (!xml->writeTo(presetFile))
@@ -50,7 +56,6 @@ void PresetManager::savePreset(const juce::String& presetName)
         DBG("Could not create preset file: " + presetFile.getFullPathName());
         jassertfalse;
     }
-    mCurrentPreset = presetName;
 }
 
 void PresetManager::deletePreset(const juce::String& presetName)
@@ -71,7 +76,7 @@ void PresetManager::deletePreset(const juce::String& presetName)
         jassertfalse;
         return;
     }
-    mCurrentPreset = "";
+    mCurrentPreset.setValue("");
 }
 
 void PresetManager::loadPreset(const juce::String& presetName)
@@ -90,7 +95,7 @@ void PresetManager::loadPreset(const juce::String& presetName)
     const auto valueTreeToLoad = juce::ValueTree::fromXml(*xmlDocument.getDocumentElement());
 
     mValueTreeState.replaceState(valueTreeToLoad);
-    mCurrentPreset = presetName;
+    mCurrentPreset.setValue(presetName);
 }
 
 int PresetManager::loadNextPreset()
@@ -99,7 +104,7 @@ int PresetManager::loadNextPreset()
     if (allPresets.isEmpty())
         return -1;
     
-    const auto currentIndex = allPresets.indexOf(mCurrentPreset);
+    const auto currentIndex = allPresets.indexOf(mCurrentPreset.toString());
     const auto nextIndex = (currentIndex + 1 > (allPresets.size() - 1)) ? 0 : currentIndex + 1;
     loadPreset(allPresets.getReference(nextIndex));
     return nextIndex;
@@ -111,7 +116,7 @@ int PresetManager::loadPreviousPreset()
     if (allPresets.isEmpty())
         return -1;
 
-    const auto currentIndex = allPresets.indexOf(mCurrentPreset);
+    const auto currentIndex = allPresets.indexOf(mCurrentPreset.toString());
     const auto previousIndex = (currentIndex - 1 < 0) ? allPresets.size() - 1 : currentIndex - 1;
     loadPreset(allPresets.getReference(previousIndex));
     return previousIndex;
@@ -132,5 +137,10 @@ juce::StringArray PresetManager::getAllPresets() const
 
 juce::String PresetManager::getCurrentPreset() const
 {
-    return mCurrentPreset;
+    return mCurrentPreset.toString();
+}
+
+void PresetManager::valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged)
+{
+    mCurrentPreset.referTo(treeWhichHasBeenChanged.getPropertyAsValue(presetNameProperty, nullptr));
 }

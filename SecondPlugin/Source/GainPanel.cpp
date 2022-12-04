@@ -35,8 +35,8 @@ void GainPanel::setParameterID(ParameterID inParameterID)
     );
     addAndMakeVisible(mSlider);
 
-    mSliderLabel = new juce::Label(parameterName[(int) inParameterID], parameterName[(int) inParameterID]);
-    mSliderLabel->attachToComponent(mSlider, true);
+    //mSliderLabel = new juce::Label(parameterName[(int) inParameterID], parameterName[(int) inParameterID]);
+    //mSliderLabel->attachToComponent(mSlider, true);
 }
 
 

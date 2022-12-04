@@ -62,7 +62,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     juce::AudioProcessorValueTreeState& getValueTreeState() { return mValueTreeState; };
-    PresetManager& getPresetManager() { return mPresetManager; };
+    PresetManager& getPresetManager() { return *mPresetManager; };
 
 private:
     // juce::ScopedPointer<Gain> mGain[2];
@@ -72,7 +72,7 @@ private:
     std::unique_ptr<Gain> mGainOutput[2];
 
     juce::AudioProcessorValueTreeState mValueTreeState;
-    PresetManager mPresetManager;
+    std::unique_ptr<PresetManager> mPresetManager;
     
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     void initializeDSP();
