@@ -32,6 +32,6 @@ public:
 
 private:
     void valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged) override;
-    juce::Value mCurrentPreset;
     juce::AudioProcessorValueTreeState& mValueTreeState;
+    juce::Value mCurrentPreset;
 };

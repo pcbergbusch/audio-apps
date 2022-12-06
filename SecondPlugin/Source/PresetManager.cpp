@@ -21,7 +21,8 @@ const juce::String PresetManager::extension{ "preset" };
 const juce::String PresetManager::presetNameProperty{ "presetName" };
 
 PresetManager::PresetManager(juce::AudioProcessorValueTreeState& valueTreeState)
-    : mValueTreeState(valueTreeState)
+    : juce::ValueTree::Listener(),
+      mValueTreeState(valueTreeState)
 {
     // Create a default directory for presets if it doesn't exist
     if (!defaultDirectory.exists())
@@ -35,6 +36,7 @@ PresetManager::PresetManager(juce::AudioProcessorValueTreeState& valueTreeState)
     }
 
     mValueTreeState.state.addListener(this);
+    mCurrentPreset.setValue(mValueTreeState.state.getPropertyAsValue(presetNameProperty, nullptr));
     mCurrentPreset.referTo(mValueTreeState.state.getPropertyAsValue(presetNameProperty, nullptr));
 }
 
@@ -94,6 +96,8 @@ void PresetManager::loadPreset(const juce::String& presetName)
     juce::XmlDocument xmlDocument{ presetFile };
     const auto valueTreeToLoad = juce::ValueTree::fromXml(*xmlDocument.getDocumentElement());
 
+    // to maintain backwards compatibility with previous preset versions, it is usually better to loop
+    // through the state variables and reset just those required, rather than to replace the whole state
     mValueTreeState.replaceState(valueTreeToLoad);
     mCurrentPreset.setValue(presetName);
 }

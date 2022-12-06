@@ -25,6 +25,8 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
       mValueTreeState(*this, nullptr, "PARAMETERS", createParameterLayout())
 #endif
 {
+    // It is better to save the current preset name and version in the juce::ApplicationProperties
+    // rather than as properties of the state - because the xml file can be renamed by the user
     mValueTreeState.state.setProperty(PresetManager::presetNameProperty, "", nullptr);
     mValueTreeState.state.setProperty("version", ProjectInfo::versionString, nullptr);
     mPresetManager = std::make_unique<PresetManager>(mValueTreeState);
@@ -239,6 +241,8 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
 
     if (xmlState.get() != nullptr)
         if (xmlState->hasTagName(mValueTreeState.state.getType()))
+            // to maintain backwards compatibility with previous preset versions, it is usually better to loop
+            // through the state variables and reset just those required, rather than to replace the whole state
             mValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
