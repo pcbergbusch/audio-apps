@@ -36,13 +36,14 @@ PresetManager::PresetManager(juce::AudioProcessorValueTreeState& valueTreeState)
     }
 
     mValueTreeState.state.addListener(this);
-    mCurrentPreset.setValue(mValueTreeState.state.getPropertyAsValue(presetNameProperty, nullptr));
-    mCurrentPreset.referTo(mValueTreeState.state.getPropertyAsValue(presetNameProperty, nullptr));
+    mCurrentPreset.setValue(mValueTreeState.state.getProperty(presetNameProperty));
+    //mCurrentPreset.referTo(mValueTreeState.state.getPropertyAsValue(presetNameProperty, nullptr));
+    loadPreset(getCurrentPreset());
 }
 
 PresetManager::~PresetManager()
 {
-
+    mValueTreeState.state.removeListener(this);
 }
 
 void PresetManager::savePreset(const juce::String& presetName)
@@ -144,7 +145,16 @@ juce::String PresetManager::getCurrentPreset() const
     return mCurrentPreset.toString();
 }
 
-void PresetManager::valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged)
+//void PresetManager::valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged)
+//{
+//    mCurrentPreset.referTo(treeWhichHasBeenChanged.getPropertyAsValue(presetNameProperty, nullptr));
+//}
+
+void PresetManager::valueTreePropertyChanged(
+    juce::ValueTree& treeWhosePropertyHasChanged,
+    const juce::Identifier& property
+)
 {
-    mCurrentPreset.referTo(treeWhichHasBeenChanged.getPropertyAsValue(presetNameProperty, nullptr));
+    if (property.toString() == presetNameProperty)
+        mCurrentPreset.setValue(treeWhosePropertyHasChanged.getProperty(property.toString()));
 }

@@ -240,10 +240,13 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
     std::unique_ptr<juce::XmlElement> xmlState = getXmlFromBinary(data, sizeInBytes);
 
     if (xmlState.get() != nullptr)
-        if (xmlState->hasTagName(mValueTreeState.state.getType()))
+        if (xmlState->hasTagName(mValueTreeState.state.getType())) {
             // to maintain backwards compatibility with previous preset versions, it is usually better to loop
             // through the state variables and reset just those required, rather than to replace the whole state
             mValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
+            juce::String presetName = mValueTreeState.state.getProperty(PresetManager::presetNameProperty);
+            mPresetManager->loadPreset(presetName);
+        }
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout SecondPluginAudioProcessor::createParameterLayout()

@@ -31,7 +31,11 @@ public:
     juce::String getCurrentPreset() const;
 
 private:
-    void valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged) override;
+    void valueTreePropertyChanged(
+        juce::ValueTree& treeWhosePropertyHasChanged,
+        const juce::Identifier& property
+    ) override;
+    //void valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged) override;
     juce::AudioProcessorValueTreeState& mValueTreeState;
     juce::Value mCurrentPreset;
 };
