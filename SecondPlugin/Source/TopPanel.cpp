@@ -11,7 +11,7 @@
 #include "TopPanel.h"
 
 TopPanel::TopPanel(SecondPluginAudioProcessor* inProcessor)
-    : BasePanel(inProcessor), juce::Button::Listener(), juce::ComboBox::Listener()
+    : BasePanel(inProcessor), juce::Button::Listener(), juce::ComboBox::Listener(), juce::ValueTree::Listener()
 {
     setSize(TOP_PANEL_WIDTH, TOP_PANEL_HEIGHT);
     configureButton(mSaveButton, "Save");
@@ -23,6 +23,8 @@ TopPanel::TopPanel(SecondPluginAudioProcessor* inProcessor)
     mPresetList.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     addAndMakeVisible(mPresetList);
     mPresetList.addListener(this);
+
+    mProcessor->getValueTreeState().state.addListener(this);
 
     loadPresetList();
 }
@@ -90,6 +92,16 @@ void TopPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
     {
         mProcessor->getPresetManager().loadPreset(mPresetList.getItemText(mPresetList.getSelectedItemIndex()));
     }
+}
+
+void TopPanel::valueTreePropertyChanged(
+    juce::ValueTree& treeWhosePropertyHasChanged,
+    const juce::Identifier& property
+)
+{
+    if (property.toString() == PresetManager::presetNameProperty)
+        mProcessor->getPresetManager().loadPreset(treeWhosePropertyHasChanged.getProperty(property.toString()));
+    loadPresetList();
 }
 
 void TopPanel::configureButton(juce::Button& button, const juce::String& buttonText)

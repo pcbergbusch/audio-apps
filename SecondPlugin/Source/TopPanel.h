@@ -13,7 +13,7 @@
 #include "BasePanel.h"
 
 class TopPanel
-    : public BasePanel, juce::Button::Listener, juce::ComboBox::Listener
+    : public BasePanel, juce::Button::Listener, juce::ComboBox::Listener, juce::ValueTree::Listener
 {
 public:
     TopPanel(SecondPluginAudioProcessor* inProcessor);
@@ -24,6 +24,10 @@ public:
 private:
     void buttonClicked(juce::Button* button) override;
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
+    void valueTreePropertyChanged(
+        juce::ValueTree& treeWhosePropertyHasChanged,
+        const juce::Identifier& property
+    ) override;
 
     void configureButton(juce::Button& button, const juce::String& buttonText);
     void loadPresetList();
