@@ -29,7 +29,7 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
     // rather than as properties of the state - because the xml file can be renamed by the user
     mValueTreeState.state.setProperty(PresetManager::presetNameProperty, "", nullptr);
     mValueTreeState.state.setProperty("version", ProjectInfo::versionString, nullptr);
-    mPresetManager = std::make_unique<PresetManager>(mValueTreeState);
+    mPresetManager = std::make_unique<PresetManager>();
     initializeDSP();
 }
 
@@ -244,8 +244,6 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
             // to maintain backwards compatibility with previous preset versions, it is usually better to loop
             // through the state variables and reset just those required, rather than to replace the whole state
             mValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
-            juce::String presetName = mValueTreeState.state.getProperty(PresetManager::presetNameProperty);
-            mPresetManager->loadPreset(presetName);
         }
 }
 

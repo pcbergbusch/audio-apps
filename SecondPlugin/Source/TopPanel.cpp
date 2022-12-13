@@ -11,7 +11,8 @@
 #include "TopPanel.h"
 
 TopPanel::TopPanel(SecondPluginAudioProcessor* inProcessor)
-    : BasePanel(inProcessor), juce::Button::Listener(), juce::ComboBox::Listener(), juce::ValueTree::Listener()
+    : BasePanel(inProcessor),
+      juce::Button::Listener(), juce::ComboBox::Listener(), juce::ValueTree::Listener()
 {
     setSize(TOP_PANEL_WIDTH, TOP_PANEL_HEIGHT);
     configureButton(mSaveButton, "Save");
@@ -22,11 +23,10 @@ TopPanel::TopPanel(SecondPluginAudioProcessor* inProcessor)
     mPresetList.setTextWhenNothingSelected("No Preset Selected");
     mPresetList.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     addAndMakeVisible(mPresetList);
+    loadPresetList();
     mPresetList.addListener(this);
 
     mProcessor->getValueTreeState().state.addListener(this);
-
-    loadPresetList();
 }
 
 TopPanel::~TopPanel()
@@ -36,19 +36,12 @@ TopPanel::~TopPanel()
     mPreviousPresetButton.removeListener(this);
     mNextPresetButton.removeListener(this);
     mPresetList.removeListener(this);
+    mProcessor->getValueTreeState().state.removeListener(this);
 }
 
 void TopPanel::paint(juce::Graphics& g)
 {
     BasePanel::paint(g);
-
-    /*g.drawFittedText(
-        "PAUL'S SECOND PLUGIN",
-        0, 0,
-        getWidth() - 10, getHeight(),
-        juce::Justification::centredRight,
-        1
-    );*/
 }
 
 void TopPanel::buttonClicked(juce::Button* button)
@@ -64,19 +57,22 @@ void TopPanel::buttonClicked(juce::Button* button)
             juce::FileBrowserComponent::saveMode, [&](const juce::FileChooser& chooser)
                 {
                     const auto resultFile = chooser.getResult();
-                    mProcessor->getPresetManager().savePreset(resultFile.getFileNameWithoutExtension());
+                    mProcessor->getPresetManager().savePreset(
+                        mProcessor->getValueTreeState(),
+                        resultFile.getFileNameWithoutExtension()
+                    );
                     loadPresetList();
                 }
         );
     }
     if (button == &mPreviousPresetButton)
     {
-        const auto index = mProcessor->getPresetManager().loadPreviousPreset();
+        const auto index = mProcessor->getPresetManager().loadPreviousPreset(mProcessor->getValueTreeState());
         mPresetList.setSelectedItemIndex(index, juce::dontSendNotification);
     }
     if (button == &mNextPresetButton)
     {
-        const auto index = mProcessor->getPresetManager().loadNextPreset();
+        const auto index = mProcessor->getPresetManager().loadNextPreset(mProcessor->getValueTreeState());
         mPresetList.setSelectedItemIndex(index, juce::dontSendNotification);
     }
     if (button == &mDeleteButton)
@@ -90,7 +86,10 @@ void TopPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
 {
     if (comboBoxThatHasChanged == &mPresetList)
     {
-        mProcessor->getPresetManager().loadPreset(mPresetList.getItemText(mPresetList.getSelectedItemIndex()));
+        mProcessor->getPresetManager().loadPreset(
+            mProcessor->getValueTreeState(),
+            mPresetList.getItemText(mPresetList.getSelectedItemIndex())
+        );
     }
 }
 
@@ -99,9 +98,9 @@ void TopPanel::valueTreePropertyChanged(
     const juce::Identifier& property
 )
 {
-    if (property.toString() == PresetManager::presetNameProperty)
-        mProcessor->getPresetManager().loadPreset(treeWhosePropertyHasChanged.getProperty(property.toString()));
-    loadPresetList();
+    if (property.toString() == PresetManager::presetNameProperty) {
+        loadPresetList();
+    }
 }
 
 void TopPanel::configureButton(juce::Button& button, const juce::String& buttonText)

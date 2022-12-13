@@ -20,9 +20,8 @@ const juce::String PresetManager::extension{ "preset" };
 
 const juce::String PresetManager::presetNameProperty{ "presetName" };
 
-PresetManager::PresetManager(juce::AudioProcessorValueTreeState& valueTreeState)
-    : juce::ValueTree::Listener(),
-      mValueTreeState(valueTreeState)
+PresetManager::PresetManager()
+    : mCurrentPreset("")
 {
     // Create a default directory for presets if it doesn't exist
     if (!defaultDirectory.exists())
@@ -34,25 +33,24 @@ PresetManager::PresetManager(juce::AudioProcessorValueTreeState& valueTreeState)
             jassertfalse;
         }
     }
-
-    mValueTreeState.state.addListener(this);
-    mCurrentPreset.setValue(mValueTreeState.state.getProperty(presetNameProperty));
-    //mCurrentPreset.referTo(mValueTreeState.state.getPropertyAsValue(presetNameProperty, nullptr));
-    loadPreset(getCurrentPreset());
 }
 
 PresetManager::~PresetManager()
 {
-    mValueTreeState.state.removeListener(this);
+
 }
 
-void PresetManager::savePreset(const juce::String& presetName)
+void PresetManager::savePreset(
+    juce::AudioProcessorValueTreeState& valueTreeState,
+    const juce::String& presetName
+)
 {
     if (presetName.isEmpty())
         return;
     
-    mCurrentPreset.setValue(presetName);
-    const auto xml = mValueTreeState.copyState().createXml();
+    mCurrentPreset = presetName;
+    valueTreeState.state.setProperty(PresetManager::presetNameProperty, presetName, nullptr);
+    const auto xml = valueTreeState.state.createXml();
     const auto presetFile = defaultDirectory.getChildFile(presetName + "." + extension);
     if (!xml->writeTo(presetFile))
     {
@@ -79,10 +77,13 @@ void PresetManager::deletePreset(const juce::String& presetName)
         jassertfalse;
         return;
     }
-    mCurrentPreset.setValue("");
+    mCurrentPreset = "";
 }
 
-void PresetManager::loadPreset(const juce::String& presetName)
+void PresetManager::loadPreset(
+    juce::AudioProcessorValueTreeState& valueTreeState,
+    const juce::String& presetName
+)
 {
     if (presetName.isEmpty())
         return;
@@ -94,36 +95,35 @@ void PresetManager::loadPreset(const juce::String& presetName)
         jassertfalse;
         return;
     }
-    juce::XmlDocument xmlDocument{ presetFile };
-    const auto valueTreeToLoad = juce::ValueTree::fromXml(*xmlDocument.getDocumentElement());
-
     // to maintain backwards compatibility with previous preset versions, it is usually better to loop
     // through the state variables and reset just those required, rather than to replace the whole state
-    mValueTreeState.replaceState(valueTreeToLoad);
-    mCurrentPreset.setValue(presetName);
+    juce::XmlDocument xmlDocument{ presetFile };
+    const auto valueTreeToLoad = juce::ValueTree::fromXml(*xmlDocument.getDocumentElement());
+    valueTreeState.replaceState(valueTreeToLoad);
+    mCurrentPreset = presetName;
 }
 
-int PresetManager::loadNextPreset()
+int PresetManager::loadNextPreset(juce::AudioProcessorValueTreeState& valueTreeState)
 {
     const auto allPresets = getAllPresets();
     if (allPresets.isEmpty())
         return -1;
     
-    const auto currentIndex = allPresets.indexOf(mCurrentPreset.toString());
+    const auto currentIndex = allPresets.indexOf(mCurrentPreset);
     const auto nextIndex = (currentIndex + 1 > (allPresets.size() - 1)) ? 0 : currentIndex + 1;
-    loadPreset(allPresets.getReference(nextIndex));
+    loadPreset(valueTreeState, allPresets.getReference(nextIndex));
     return nextIndex;
 }
 
-int PresetManager::loadPreviousPreset()
+int PresetManager::loadPreviousPreset(juce::AudioProcessorValueTreeState& valueTreeState)
 {
     const auto allPresets = getAllPresets();
     if (allPresets.isEmpty())
         return -1;
 
-    const auto currentIndex = allPresets.indexOf(mCurrentPreset.toString());
+    const auto currentIndex = allPresets.indexOf(mCurrentPreset);
     const auto previousIndex = (currentIndex - 1 < 0) ? allPresets.size() - 1 : currentIndex - 1;
-    loadPreset(allPresets.getReference(previousIndex));
+    loadPreset(valueTreeState, allPresets.getReference(previousIndex));
     return previousIndex;
 }
 
@@ -142,19 +142,10 @@ juce::StringArray PresetManager::getAllPresets() const
 
 juce::String PresetManager::getCurrentPreset() const
 {
-    return mCurrentPreset.toString();
+    return mCurrentPreset;
 }
 
 //void PresetManager::valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged)
 //{
 //    mCurrentPreset.referTo(treeWhichHasBeenChanged.getPropertyAsValue(presetNameProperty, nullptr));
 //}
-
-void PresetManager::valueTreePropertyChanged(
-    juce::ValueTree& treeWhosePropertyHasChanged,
-    const juce::Identifier& property
-)
-{
-    if (property.toString() == presetNameProperty)
-        mCurrentPreset.setValue(treeWhosePropertyHasChanged.getProperty(property.toString()));
-}

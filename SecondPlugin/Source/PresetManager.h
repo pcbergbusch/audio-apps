@@ -12,30 +12,30 @@
 
 #include "JuceHeader.h"
 
-class PresetManager : public juce::ValueTree::Listener
+class PresetManager
 {
 public:
     static const juce::File defaultDirectory;
     static const juce::String extension;
     static const juce::String presetNameProperty;
 
-    PresetManager(juce::AudioProcessorValueTreeState& valueTreeState);
+    PresetManager();
     ~PresetManager();
 
-    void savePreset(const juce::String& presetName);
+    void savePreset(
+        juce::AudioProcessorValueTreeState& valueTreeState,
+        const juce::String& presetName
+    );
     void deletePreset(const juce::String& presetName);
-    void loadPreset(const juce::String& presetName);
-    int loadNextPreset();
-    int loadPreviousPreset();
+    void loadPreset(
+        juce::AudioProcessorValueTreeState& valueTreeState,
+        const juce::String& presetName
+    );
+    int loadNextPreset(juce::AudioProcessorValueTreeState& valueTreeState);
+    int loadPreviousPreset(juce::AudioProcessorValueTreeState& valueTreeState);
     juce::StringArray getAllPresets() const;
     juce::String getCurrentPreset() const;
 
 private:
-    void valueTreePropertyChanged(
-        juce::ValueTree& treeWhosePropertyHasChanged,
-        const juce::Identifier& property
-    ) override;
-    //void valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged) override;
-    juce::AudioProcessorValueTreeState& mValueTreeState;
-    juce::Value mCurrentPreset;
+    juce::String mCurrentPreset;
 };
