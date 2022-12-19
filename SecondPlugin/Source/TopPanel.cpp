@@ -15,16 +15,14 @@ TopPanel::TopPanel(SecondPluginAudioProcessor* inProcessor)
       juce::Button::Listener(), juce::ComboBox::Listener(), juce::ValueTree::Listener()
 {
     setSize(TOP_PANEL_WIDTH, TOP_PANEL_HEIGHT);
+
     configureButton(mSaveButton, "Save");
     configureButton(mDeleteButton, "Delete");
     configureButton(mPreviousPresetButton, "<");
     configureButton(mNextPresetButton, ">");
 
-    mPresetList.setTextWhenNothingSelected("No Preset Selected");
-    mPresetList.setMouseCursor(juce::MouseCursor::PointingHandCursor);
-    addAndMakeVisible(mPresetList);
+    configurePresetList("No Preset Selected");
     loadPresetList();
-    mPresetList.addListener(this);
 
     mProcessor->getValueTreeState().state.addListener(this);
 }
@@ -109,6 +107,14 @@ void TopPanel::configureButton(juce::Button& button, const juce::String& buttonT
     button.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     addAndMakeVisible(button);
     button.addListener(this);
+}
+
+void TopPanel::configurePresetList(const juce::String& presetListText)
+{
+    mPresetList.setTextWhenNothingSelected(presetListText);
+    mPresetList.setMouseCursor(juce::MouseCursor::PointingHandCursor);
+    addAndMakeVisible(mPresetList);
+    mPresetList.addListener(this);
 }
 
 void TopPanel::loadPresetList()

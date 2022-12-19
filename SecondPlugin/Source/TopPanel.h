@@ -30,6 +30,7 @@ private:
     ) override;
 
     void configureButton(juce::Button& button, const juce::String& buttonText);
+    void configurePresetList(const juce::String& presetListText);
     void loadPresetList();
     void resized() override;
 

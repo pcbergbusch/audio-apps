@@ -21,14 +21,14 @@ SecondPluginAudioProcessor::SecondPluginAudioProcessor()
             #endif
             .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
         #endif
-      ),
-      mValueTreeState(*this, nullptr, "PARAMETERS", createParameterLayout())
+      )
 #endif
 {
-    // It is better to save the current preset name and version in the juce::ApplicationProperties
+    mValueTreeState = std::make_unique<juce::AudioProcessorValueTreeState>(*this, nullptr, "PARAMETERS", createParameterLayout());
+    // It may be better to save the current preset name and version in the juce::ApplicationProperties
     // rather than as properties of the state - because the xml file can be renamed by the user
-    mValueTreeState.state.setProperty(PresetManager::presetNameProperty, "", nullptr);
-    mValueTreeState.state.setProperty("version", ProjectInfo::versionString, nullptr);
+    mValueTreeState->state.setProperty(PresetManager::presetNameProperty, "No Preset Selected1", nullptr);
+    mValueTreeState->state.setProperty("version", ProjectInfo::versionString, nullptr);
     mPresetManager = std::make_unique<PresetManager>();
     initializeDSP();
 }
@@ -178,17 +178,17 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
         mGainInput[channel]->process(
             channelData,
-            mValueTreeState.getParameter(parameterName[(int)ParameterID::inputGain])->getValue(),
+            mValueTreeState->getParameter(parameterName[(int)ParameterID::inputGain])->getValue(),
             channelData,
             buffer.getNumSamples()
         );
 
         mDelay[channel]->process(
             channelData,
-            mValueTreeState.getParameter(parameterName[(int)ParameterID::delayTime])->getValue(),
-            mValueTreeState.getParameter(parameterName[(int)ParameterID::delayFeedback])->getValue(),
-            mValueTreeState.getParameter(parameterName[(int)ParameterID::delayWetDry])->getValue(),
-            mValueTreeState.getParameter(parameterName[(int)ParameterID::delayType])->getValue(),
+            mValueTreeState->getParameter(parameterName[(int)ParameterID::delayTime])->getValue(),
+            mValueTreeState->getParameter(parameterName[(int)ParameterID::delayFeedback])->getValue(),
+            mValueTreeState->getParameter(parameterName[(int)ParameterID::delayWetDry])->getValue(),
+            mValueTreeState->getParameter(parameterName[(int)ParameterID::delayType])->getValue(),
             mLFO[channel]->getBuffer(),
             channelData,
             buffer.getNumSamples()
@@ -197,14 +197,14 @@ void SecondPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
         mLFO[channel]->process(
             // no osc on channel 0, only channel 1 -> chorus effect
-            (channel == 0) ? 0.0f : mValueTreeState.getParameter(parameterName[(int)ParameterID::modulationRate])->getValue(),
-            mValueTreeState.getParameter(parameterName[(int)ParameterID::modulationDepth])->getValue(),
+            (channel == 0) ? 0.0f : mValueTreeState->getParameter(parameterName[(int)ParameterID::modulationRate])->getValue(),
+            mValueTreeState->getParameter(parameterName[(int)ParameterID::modulationDepth])->getValue(),
             buffer.getNumSamples()
         );
 
         mGainOutput[channel]->process(
             channelData,
-            mValueTreeState.getParameter(parameterName[(int)ParameterID::outputGain])->getValue(),
+            mValueTreeState->getParameter(parameterName[(int)ParameterID::outputGain])->getValue(),
             channelData,
             buffer.getNumSamples()
         );
@@ -228,7 +228,7 @@ void SecondPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    auto state = mValueTreeState.copyState();
+    auto state = mValueTreeState->copyState();
     std::unique_ptr<juce::XmlElement> xml = state.createXml();
     copyXmlToBinary(*xml, destData);
 }
@@ -240,10 +240,11 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
     std::unique_ptr<juce::XmlElement> xmlState = getXmlFromBinary(data, sizeInBytes);
 
     if (xmlState.get() != nullptr)
-        if (xmlState->hasTagName(mValueTreeState.state.getType())) {
+        if (xmlState->hasTagName(mValueTreeState->state.getType())) {
             // to maintain backwards compatibility with previous preset versions, it is usually better to loop
             // through the state variables and reset just those required, rather than to replace the whole state
-            mValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
+            mValueTreeState->replaceState(juce::ValueTree::fromXml(*xmlState));
+            mPresetManager->setCurrentPreset(mValueTreeState->state.getProperty(PresetManager::presetNameProperty));
         }
 }
 

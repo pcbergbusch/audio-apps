@@ -35,6 +35,7 @@ public:
     int loadPreviousPreset(juce::AudioProcessorValueTreeState& valueTreeState);
     juce::StringArray getAllPresets() const;
     juce::String getCurrentPreset() const;
+    void setCurrentPreset(juce::String currentPreset);
 
 private:
     juce::String mCurrentPreset;

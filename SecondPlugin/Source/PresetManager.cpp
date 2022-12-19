@@ -49,6 +49,8 @@ void PresetManager::savePreset(
         return;
     
     mCurrentPreset = presetName;
+    // It may be better to save the current preset name and version in the juce::ApplicationProperties
+    // rather than as properties of the state - because the xml file can be renamed by the user
     valueTreeState.state.setProperty(PresetManager::presetNameProperty, presetName, nullptr);
     const auto xml = valueTreeState.state.createXml();
     const auto presetFile = defaultDirectory.getChildFile(presetName + "." + extension);
@@ -143,6 +145,11 @@ juce::StringArray PresetManager::getAllPresets() const
 juce::String PresetManager::getCurrentPreset() const
 {
     return mCurrentPreset;
+}
+
+void PresetManager::setCurrentPreset(juce::String currentPreset)
+{
+    mCurrentPreset = currentPreset;
 }
 
 //void PresetManager::valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged)
