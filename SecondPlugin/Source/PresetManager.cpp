@@ -20,8 +20,10 @@ const juce::String PresetManager::extension{ "preset" };
 
 const juce::String PresetManager::presetNameProperty{ "presetName" };
 
-PresetManager::PresetManager()
-    : mCurrentPreset("")
+const juce::String PresetManager::presetNameDefault{ "No Preset Selected" };
+
+PresetManager::PresetManager(juce::AudioProcessorValueTreeState& inValueTreeState)
+    : valueTreeState(inValueTreeState), mCurrentPreset(presetNameDefault)
 {
     // Create a default directory for presets if it doesn't exist
     if (!defaultDirectory.exists())
@@ -40,10 +42,7 @@ PresetManager::~PresetManager()
 
 }
 
-void PresetManager::savePreset(
-    juce::AudioProcessorValueTreeState& valueTreeState,
-    const juce::String& presetName
-)
+void PresetManager::savePreset(const juce::String& presetName)
 {
     if (presetName.isEmpty())
         return;
@@ -52,6 +51,7 @@ void PresetManager::savePreset(
     // It may be better to save the current preset name and version in the juce::ApplicationProperties
     // rather than as properties of the state - because the xml file can be renamed by the user
     valueTreeState.state.setProperty(PresetManager::presetNameProperty, presetName, nullptr);
+    valueTreeState.state.setProperty("version", ProjectInfo::versionString, nullptr);
     const auto xml = valueTreeState.state.createXml();
     const auto presetFile = defaultDirectory.getChildFile(presetName + "." + extension);
     if (!xml->writeTo(presetFile))
@@ -80,12 +80,14 @@ void PresetManager::deletePreset(const juce::String& presetName)
         return;
     }
     mCurrentPreset = "";
+    valueTreeState.state.setProperty(
+        PresetManager::presetNameProperty,
+        PresetManager::presetNameDefault,
+        nullptr
+    );
 }
 
-void PresetManager::loadPreset(
-    juce::AudioProcessorValueTreeState& valueTreeState,
-    const juce::String& presetName
-)
+void PresetManager::loadPreset(const juce::String& presetName)
 {
     if (presetName.isEmpty())
         return;
@@ -105,7 +107,7 @@ void PresetManager::loadPreset(
     mCurrentPreset = presetName;
 }
 
-int PresetManager::loadNextPreset(juce::AudioProcessorValueTreeState& valueTreeState)
+int PresetManager::loadNextPreset()
 {
     const auto allPresets = getAllPresets();
     if (allPresets.isEmpty())
@@ -113,11 +115,11 @@ int PresetManager::loadNextPreset(juce::AudioProcessorValueTreeState& valueTreeS
     
     const auto currentIndex = allPresets.indexOf(mCurrentPreset);
     const auto nextIndex = (currentIndex + 1 > (allPresets.size() - 1)) ? 0 : currentIndex + 1;
-    loadPreset(valueTreeState, allPresets.getReference(nextIndex));
+    loadPreset(allPresets.getReference(nextIndex));
     return nextIndex;
 }
 
-int PresetManager::loadPreviousPreset(juce::AudioProcessorValueTreeState& valueTreeState)
+int PresetManager::loadPreviousPreset()
 {
     const auto allPresets = getAllPresets();
     if (allPresets.isEmpty())
@@ -125,7 +127,7 @@ int PresetManager::loadPreviousPreset(juce::AudioProcessorValueTreeState& valueT
 
     const auto currentIndex = allPresets.indexOf(mCurrentPreset);
     const auto previousIndex = (currentIndex - 1 < 0) ? allPresets.size() - 1 : currentIndex - 1;
-    loadPreset(valueTreeState, allPresets.getReference(previousIndex));
+    loadPreset(allPresets.getReference(previousIndex));
     return previousIndex;
 }
 

@@ -61,8 +61,8 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    juce::AudioProcessorValueTreeState& getValueTreeState() { return *mValueTreeState; };
-    PresetManager& getPresetManager() { return *mPresetManager; };
+    juce::AudioProcessorValueTreeState& getValueTreeState() { return mValueTreeState; };
+    PresetManager& getPresetManager() { return mPresetManager; };
 
 private:
     // juce::ScopedPointer<Gain> mGain[2];
@@ -71,8 +71,8 @@ private:
     std::unique_ptr<LFO> mLFO[2];
     std::unique_ptr<Gain> mGainOutput[2];
 
-    std::unique_ptr<juce::AudioProcessorValueTreeState> mValueTreeState;
-    std::unique_ptr<PresetManager> mPresetManager;
+    juce::AudioProcessorValueTreeState mValueTreeState;
+    PresetManager mPresetManager;
     
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     void initializeDSP();

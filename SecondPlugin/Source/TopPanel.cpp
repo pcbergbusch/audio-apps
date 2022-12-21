@@ -21,7 +21,7 @@ TopPanel::TopPanel(SecondPluginAudioProcessor* inProcessor)
     configureButton(mPreviousPresetButton, "<");
     configureButton(mNextPresetButton, ">");
 
-    configurePresetList("No Preset Selected");
+    configurePresetList(PresetManager::presetNameDefault);
     loadPresetList();
 
     mProcessor->getValueTreeState().state.addListener(this);
@@ -56,7 +56,6 @@ void TopPanel::buttonClicked(juce::Button* button)
                 {
                     const auto resultFile = chooser.getResult();
                     mProcessor->getPresetManager().savePreset(
-                        mProcessor->getValueTreeState(),
                         resultFile.getFileNameWithoutExtension()
                     );
                     loadPresetList();
@@ -65,12 +64,12 @@ void TopPanel::buttonClicked(juce::Button* button)
     }
     if (button == &mPreviousPresetButton)
     {
-        const auto index = mProcessor->getPresetManager().loadPreviousPreset(mProcessor->getValueTreeState());
+        const auto index = mProcessor->getPresetManager().loadPreviousPreset();
         mPresetList.setSelectedItemIndex(index, juce::dontSendNotification);
     }
     if (button == &mNextPresetButton)
     {
-        const auto index = mProcessor->getPresetManager().loadNextPreset(mProcessor->getValueTreeState());
+        const auto index = mProcessor->getPresetManager().loadNextPreset();
         mPresetList.setSelectedItemIndex(index, juce::dontSendNotification);
     }
     if (button == &mDeleteButton)
@@ -85,7 +84,6 @@ void TopPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
     if (comboBoxThatHasChanged == &mPresetList)
     {
         mProcessor->getPresetManager().loadPreset(
-            mProcessor->getValueTreeState(),
             mPresetList.getItemText(mPresetList.getSelectedItemIndex())
         );
     }
