@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "MainPanel.h"
+#include "LookAndFeel.h"
 
 //==============================================================================
 /**
@@ -30,8 +31,9 @@ private:
     // access the processor object that created it.
     SecondPluginAudioProcessor& audioProcessor;
 
-    // std::unique_ptr<MainPanel> mMainPanel;
     std::unique_ptr<MainPanel> mMainPanel;
+    std::unique_ptr<LookAndFeel> mLookAndFeel;
+    juce::Image mBackgroundImage;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SecondPluginAudioProcessorEditor)
 };

@@ -13,19 +13,33 @@
 BasePanel::BasePanel(SecondPluginAudioProcessor* inProcessor)
     : mProcessor(inProcessor)
 {
-
+    
 }
 
 BasePanel::~BasePanel()
 {
 
 }
+void BasePanel::mouseEnter(const juce::MouseEvent& event)
+{
+    repaint();
+}
+
+void BasePanel::mouseExit(const juce::MouseEvent& event)
+{
+    repaint();
+}
 
 void BasePanel::paint(juce::Graphics& g)
 {
-    g.setColour(juce::Colours::whitesmoke);
-    g.fillAll();
+    // here we could highlight panels as the mouse moves over them, etc.
+    if (isMouseOver()) {
+        // g.setColour(colourBlackTrans20);
+        // g.fillAll();
+    }
+    // g.setColour(juce::Colours::whitesmoke);
+    // g.fillAll();
 
-    g.setColour(juce::Colours::black);
-    g.drawRect(1, 1, getWidth() - 1, getHeight() - 1, 2);
+    // g.setColour(juce::Colours::black);
+    // g.drawRect(1, 1, getWidth() - 1, getHeight() - 1, 2);
 }

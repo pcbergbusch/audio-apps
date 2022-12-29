@@ -114,23 +114,28 @@ void FxPanel::paint(juce::Graphics& g)
 {
     BasePanel::paint(g);
 
+    juce::String label;
+
     switch (mStyle)
     {
         case (FxPanelStyle::delay):
         {
-            g.drawFittedText("DELAY", 0, 0, getWidth(), int(getHeight() * 0.75), juce::Justification::centred, 1);
+            label = "DELAY";
         } break;
         case (FxPanelStyle::chorus):
         {
-            g.drawFittedText("CHORUS", 0, 0, getWidth(), int(getHeight() * 0.75), juce::Justification::centred, 1);
+            label = "CHORUS";
         } break;
         case (FxPanelStyle::numStyles):
         default:
         {
-            g.drawFittedText("Wrong Place", 0, 0, getWidth(), getHeight(), juce::Justification::centred, 1);
             jassertfalse;
         } break;
     }
+
+    g.setColour(colourGrayTrans70);
+    g.setFont(fontHelv48Bold);
+    g.drawFittedText(label, 0, 0, getWidth(), int(getHeight() * 0.45), juce::Justification::centred, 1);
 
     for (int i = 0; i < mSliders.size(); i++) {
         paintComponentLabel(g, mSliders[i]);

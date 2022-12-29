@@ -10,6 +10,7 @@
 
 #pragma once
 #include "JuceHeader.h"
+#include "LookAndFeel.h"
 
 const static float smoothingCoeffGeneric = 0.04f;
 const static float smoothingCoeffFine = 0.002f;
@@ -27,6 +28,11 @@ inline void paintComponentLabel(juce::Graphics& g, juce::Component* inComponent)
 
     const juce::String label = inComponent->getName();
 
-    g.setColour(juce::Colours::darkgrey);
+    const float cornerSize = 3.0f;
+    g.setColour(colourBlackTrans40);
+    g.fillRoundedRectangle(x, y, width, height, cornerSize);
+
+    g.setColour(colourSteel);
+    g.setFont(fontHelv12Bold);
     g.drawFittedText(label, x, y, width, height, juce::Justification::centred, 1);
 }
