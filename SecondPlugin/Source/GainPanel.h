@@ -12,6 +12,7 @@
 
 #include "BasePanel.h"
 #include "ParameterSlider.h"
+#include "VUMeter.h"
 
 class GainPanel
     : public BasePanel
@@ -26,4 +27,5 @@ public:
 private:
     juce::ScopedPointer<ParameterSlider> mSlider;
     //juce::ScopedPointer<juce::Label> mSliderLabel;
+    std::unique_ptr<VUMeter> mVUMeter;
 };

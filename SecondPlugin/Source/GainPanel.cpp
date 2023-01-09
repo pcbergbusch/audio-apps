@@ -16,6 +16,17 @@ GainPanel::GainPanel(SecondPluginAudioProcessor* inProcessor)
     : BasePanel(inProcessor)
 {
     setSize(GAIN_PANEL_WIDTH, GAIN_PANEL_HEIGHT);
+
+    mVUMeter = std::make_unique<VUMeter>(inProcessor);
+    const int meterSize = 64;
+    mVUMeter->setBounds(
+        int(getWidth() * 0.5 - meterSize * 0.5),
+        int(getHeight() * 0.55 - meterSize * 0.5),
+        meterSize,
+        getHeight() * 0.55
+    );
+    addAndMakeVisible(*mVUMeter);
+
 }
 
 GainPanel::~GainPanel()
@@ -37,6 +48,8 @@ void GainPanel::setParameterID(ParameterID inParameterID)
 
     //mSliderLabel = new juce::Label(parameterName[(int) inParameterID], parameterName[(int) inParameterID]);
     //mSliderLabel->attachToComponent(mSlider, true);
+
+    mVUMeter->setParameterID((int)inParameterID);
 }
 
 

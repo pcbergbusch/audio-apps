@@ -64,6 +64,9 @@ public:
     juce::AudioProcessorValueTreeState& getValueTreeState() { return mValueTreeState; };
     PresetManager& getPresetManager() { return mPresetManager; };
 
+    float getInputGainMeterLevel(int channel);
+    float getOutputGainMeterLevel(int channel);
+
 private:
     // juce::ScopedPointer<Gain> mGain[2];
     std::unique_ptr<Gain> mGainInput[2];

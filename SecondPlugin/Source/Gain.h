@@ -12,18 +12,21 @@
 
 #include "AudioHelpers.h"
 
-class Gain 
+class Gain
 {
-    public:
-        Gain();
-        ~Gain();
+public:
+    Gain();
+    ~Gain();
 
-        void process(
-            float* inAudio,
-            float inGain,
-            float* outAudio,
-            int numSamplesToRender
-        );
+    void process(
+        float* inAudio,
+        float inGain,
+        float* outAudio,
+        int numSamplesToRender
+    );
 
-    private:
+    float getMeterLevel();
+
+private:
+    float mLevelSmoothed;
 };

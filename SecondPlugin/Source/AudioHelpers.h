@@ -14,6 +14,7 @@
 
 const static float smoothingCoeffGeneric = 0.04f;
 const static float smoothingCoeffFine = 0.002f;
+const static float smoothingCoeffMeter = 0.2f;
 
 const static float PI = 3.14159265359f;
 

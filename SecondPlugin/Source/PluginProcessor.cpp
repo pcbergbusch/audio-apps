@@ -244,6 +244,25 @@ void SecondPluginAudioProcessor::setStateInformation (const void* data, int size
         }
 }
 
+float SecondPluginAudioProcessor::getInputGainMeterLevel(int inChannel)
+{
+    float db = juce::Decibels::gainToDecibels(
+        mGainInput[inChannel]->getMeterLevel(),
+        -96.0f
+    );
+    return (db + 96.0f) / 96.0f;
+}
+
+float SecondPluginAudioProcessor::getOutputGainMeterLevel(int inChannel)
+{
+    float db = juce::Decibels::gainToDecibels(
+        mGainOutput[inChannel]->getMeterLevel(),
+        -96.0f
+    );
+    return (db + 96.0f) / 96.0f;
+}
+
+
 juce::AudioProcessorValueTreeState::ParameterLayout SecondPluginAudioProcessor::createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
